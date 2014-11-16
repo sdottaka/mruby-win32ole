@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mruby-win32ole", "mruby-win32ole.vcxproj", "{8F0691C0-D3A4-49F4-B600-EF20469F09EE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{502D76DC-8968-4061-9451-A406A9384103} = {502D76DC-8968-4061-9451-A406A9384103}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mruby", "mruby.vcxproj", "{502D76DC-8968-4061-9451-A406A9384103}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F0691C0-D3A4-49F4-B600-EF20469F09EE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8F0691C0-D3A4-49F4-B600-EF20469F09EE}.Debug|Win32.Build.0 = Debug|Win32
+		{8F0691C0-D3A4-49F4-B600-EF20469F09EE}.Release|Win32.ActiveCfg = Release|Win32
+		{8F0691C0-D3A4-49F4-B600-EF20469F09EE}.Release|Win32.Build.0 = Release|Win32
+		{502D76DC-8968-4061-9451-A406A9384103}.Debug|Win32.ActiveCfg = Debug|Win32
+		{502D76DC-8968-4061-9451-A406A9384103}.Debug|Win32.Build.0 = Debug|Win32
+		{502D76DC-8968-4061-9451-A406A9384103}.Release|Win32.ActiveCfg = Release|Win32
+		{502D76DC-8968-4061-9451-A406A9384103}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

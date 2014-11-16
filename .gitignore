@@ -1,0 +1,4 @@
+*.un~
+/vsproj/Debug
+*.sdf
+*.ipch
