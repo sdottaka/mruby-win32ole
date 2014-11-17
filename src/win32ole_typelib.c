@@ -404,7 +404,7 @@ foletypelib_initialize(mrb_state *mrb, mrb_value self)
     }
     mrb_data_init(self, NULL, &oletypelib_datatype);
 
-    mrb_get_args(mrb, "S|SS", &typelib, &major_ver, &minor_ver);
+    mrb_get_args(mrb, "S|oo", &typelib, &major_ver, &minor_ver);
 
     ptlib = oletypelibdata_alloc(mrb);
     mrb_data_init(self, ptlib, &oletypelib_datatype);

@@ -562,7 +562,7 @@ folerecord_ole_instance_variable_set(mrb_state *mrb, mrb_value self)
 {
     mrb_value sname;
     mrb_value name, val;
-    mrb_get_args(mrb, "oS", &name, &val);
+    mrb_get_args(mrb, "oo", &name, &val);
     if(!mrb_string_p(name) && !mrb_symbol_p(name)) {
         mrb_raise(mrb, E_TYPE_ERROR, "wrong argument type (expected String or Symbol)");
     }
