@@ -615,11 +615,11 @@ Init_win32ole_record(mrb_state *mrb)
 {
     struct RClass *cWIN32OLE_RECORD = mrb_define_class(mrb, "WIN32OLE_RECORD", mrb->object_class);
     MRB_SET_INSTANCE_TT(cWIN32OLE_RECORD, MRB_TT_DATA);
-    mrb_define_method(mrb, C_WIN32OLE_RECORD, "initialize", folerecord_initialize, MRB_ARGS_REQ(2));
-    mrb_define_method(mrb, C_WIN32OLE_RECORD, "to_h", folerecord_to_h, MRB_ARGS_NONE());
-    mrb_define_method(mrb, C_WIN32OLE_RECORD, "typename", folerecord_typename, MRB_ARGS_NONE());
-    mrb_define_method(mrb, C_WIN32OLE_RECORD, "method_missing", folerecord_method_missing, MRB_ARGS_ANY());
-    mrb_define_method(mrb, C_WIN32OLE_RECORD, "ole_instance_variable_get", folerecord_ole_instance_variable_get, MRB_ARGS_REQ(1));
-    mrb_define_method(mrb, C_WIN32OLE_RECORD, "ole_instance_variable_set", folerecord_ole_instance_variable_set, MRB_ARGS_REQ(2));
-    mrb_define_method(mrb, C_WIN32OLE_RECORD, "inspect", folerecord_inspect, MRB_ARGS_NONE());
+    mrb_define_method(mrb, cWIN32OLE_RECORD, "initialize", folerecord_initialize, MRB_ARGS_REQ(2));
+    mrb_define_method(mrb, cWIN32OLE_RECORD, "to_h", folerecord_to_h, MRB_ARGS_NONE());
+    mrb_define_method(mrb, cWIN32OLE_RECORD, "typename", folerecord_typename, MRB_ARGS_NONE());
+    mrb_define_method(mrb, cWIN32OLE_RECORD, "method_missing", folerecord_method_missing, MRB_ARGS_ANY());
+    mrb_define_method(mrb, cWIN32OLE_RECORD, "ole_instance_variable_get", folerecord_ole_instance_variable_get, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, cWIN32OLE_RECORD, "ole_instance_variable_set", folerecord_ole_instance_variable_set, MRB_ARGS_REQ(2));
+    mrb_define_method(mrb, cWIN32OLE_RECORD, "inspect", folerecord_inspect, MRB_ARGS_NONE());
 }
