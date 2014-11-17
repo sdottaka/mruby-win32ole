@@ -3091,7 +3091,7 @@ static mrb_value
 fole_invoke2(mrb_state *mrb, mrb_value self)
 {
     mrb_value dispid, args, types;
-	mrb_get_args(mrb, "iAA", &dispid, &args, &types);
+    mrb_get_args(mrb, "oAA", &dispid, &args, &types);
     return ole_invoke2(mrb, self, dispid, args, types, DISPATCH_METHOD);
 }
 
