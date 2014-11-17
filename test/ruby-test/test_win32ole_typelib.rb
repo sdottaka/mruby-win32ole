@@ -4,7 +4,7 @@ rescue LoadError
 end
 require "test/unit"
 
-if defined?(WIN32OLE_TYPELIB)
+if Module.const_defined?(:WIN32OLE_TYPELIB)
   class TestWIN32OLE_TYPELIB < Test::Unit::TestCase
     def test_s_typelibs
       tlibs = WIN32OLE_TYPELIB.typelibs

@@ -4,7 +4,7 @@ rescue LoadError
 end
 require "test/unit"
 
-if defined?(WIN32OLE_VARIABLE)
+if Module.const_defined?(:WIN32OLE_VARIABLE)
   class TestWIN32OLE_VARIABLE < Test::Unit::TestCase
 
     def setup

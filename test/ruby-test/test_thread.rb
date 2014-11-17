@@ -4,7 +4,7 @@ rescue LoadError
 end
 require 'test/unit'
 
-if defined?(WIN32OLE)
+if Module.const_defined?(:WIN32OLE)
   class TestThread < Test::Unit::TestCase
     #
     # test for Bug #2618(ruby-core:27634)

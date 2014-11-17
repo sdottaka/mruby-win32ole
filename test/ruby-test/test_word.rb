@@ -10,7 +10,7 @@ require "test/unit"
 def word_installed?
   installed = false
   w = nil
-  if defined?(WIN32OLE)
+  if Module.const_defined?(:WIN32OLE)
     begin
       w = WIN32OLE.new('Word.Application')
       installed = true
@@ -25,7 +25,7 @@ def word_installed?
   return installed
 end
 
-if defined?(WIN32OLE)
+if Module.const_defined?(:WIN32OLE)
   dotest = word_installed?
   if !dotest
     STDERR.puts("\n#{__FILE__} skipped(Microsoft Word not found.)")

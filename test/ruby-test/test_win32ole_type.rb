@@ -4,7 +4,7 @@ rescue LoadError
 end
 require "test/unit"
 
-if defined?(WIN32OLE_TYPE)
+if Module.const_defined?(:WIN32OLE_TYPE)
   class TestWIN32OLE_TYPE < Test::Unit::TestCase
 
     def test_s_progids

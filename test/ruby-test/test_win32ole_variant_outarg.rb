@@ -6,7 +6,7 @@ require 'test/unit'
 
 def ado_csv_installed?
   installed = false
-  if defined?(WIN32OLE)
+  if Module.const_defined?(:WIN32OLE)
     db = nil
     begin
       db = WIN32OLE.new('ADODB.Connection')
@@ -21,7 +21,7 @@ def ado_csv_installed?
   installed
 end
 
-if defined?(WIN32OLE_VARIANT)
+if Module.const_defined?(:WIN32OLE_VARIANT)
     class TestWIN32OLE_VARIANT_OUTARG < Test::Unit::TestCase
       module ADO
       end

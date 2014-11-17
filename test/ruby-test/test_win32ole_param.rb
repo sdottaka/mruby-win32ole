@@ -4,7 +4,7 @@ rescue LoadError
 end
 require "test/unit"
 
-if defined?(WIN32OLE_PARAM)
+if Module.const_defined?(:WIN32OLE_PARAM)
   class TestWIN32OLE_PARAM < Test::Unit::TestCase
 
     def setup

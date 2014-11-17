@@ -6,7 +6,7 @@ rescue LoadError
 end
 require 'test/unit'
 
-if defined?(WIN32OLE)
+if Module.const_defined?(:WIN32OLE)
   class TestNIL2VT_EMPTY < Test::Unit::TestCase
     def setup
       fs = WIN32OLE.new('Scripting.FileSystemObject')

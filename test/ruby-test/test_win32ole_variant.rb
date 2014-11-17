@@ -4,7 +4,7 @@ rescue LoadError
 end
 require "test/unit"
 
-if defined?(WIN32OLE_VARIANT)
+if Module.const_defined?(:WIN32OLE_VARIANT)
 
   class TestWIN32OLE_VARIANT < Test::Unit::TestCase
     def setup
@@ -114,13 +114,13 @@ if defined?(WIN32OLE_VARIANT)
       assert_equal(WIN32OLE::VARIANT::VT_UI4, obj.vartype)
 
 
-      if defined?(WIN32OLE::VARIANT::VT_I8)
+      if WIN32OLE::VARIANT.const_defined?(:VT_I8)
         obj = WIN32OLE_VARIANT.new(nil, WIN32OLE::VARIANT::VT_I8)
         assert_equal(0, obj.value)
         assert_equal(WIN32OLE::VARIANT::VT_I8, obj.vartype)
       end
 
-      if defined?(WIN32OLE::VARIANT::VT_UI8)
+      if WIN32OLE::VARIANT.const_defined?(:VT_UI8)
         obj = WIN32OLE_VARIANT.new(nil, WIN32OLE::VARIANT::VT_UI8)
         assert_equal(0, obj.value)
         assert_equal(WIN32OLE::VARIANT::VT_UI8, obj.vartype)
@@ -184,13 +184,13 @@ if defined?(WIN32OLE_VARIANT)
       assert_equal(5, obj.value)
       assert_equal(WIN32OLE::VARIANT::VT_UI4, obj.vartype)
 
-      if defined?(WIN32OLE::VARIANT::VT_I8)
+      if WIN32OLE::VARIANT.const_defined?(:VT_I8)
         obj = WIN32OLE_VARIANT.new(-123456789012345, WIN32OLE::VARIANT::VT_I8)
         assert_equal(-123456789012345, obj.value)
         assert_equal(WIN32OLE::VARIANT::VT_I8, obj.vartype)
       end
 
-      if defined?(WIN32OLE::VARIANT::VT_UI8)
+      if WIN32OLE::VARIANT.const_defined?(:VT_UI8)
         obj = WIN32OLE_VARIANT.new(123456789012345, WIN32OLE::VARIANT::VT_UI8)
         assert_equal(123456789012345, obj.value)
         assert_equal(WIN32OLE::VARIANT::VT_UI8, obj.vartype)

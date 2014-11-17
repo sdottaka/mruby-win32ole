@@ -6,7 +6,7 @@ rescue LoadError
 end
 require 'test/unit'
 
-if defined?(WIN32OLE)
+if Module.const_defined?(:WIN32OLE)
   module CONST1
   end
   module CONST2

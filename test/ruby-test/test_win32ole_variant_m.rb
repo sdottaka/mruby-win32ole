@@ -4,7 +4,7 @@ rescue LoadError
 end
 require "test/unit"
 
-if defined?(WIN32OLE::VARIANT)
+if Module.const_defined?(:WIN32OLE) && WIN32OLE.const_defined?(:VARIANT)
   class TestWin32OLE_VARIANT_MODULE < Test::Unit::TestCase
     include WIN32OLE::VARIANT
     def test_variant

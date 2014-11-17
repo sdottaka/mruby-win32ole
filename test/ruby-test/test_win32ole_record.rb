@@ -64,7 +64,7 @@ End Class
 =end
 
 
-if defined?(WIN32OLE_RECORD)
+if Module.const_defined?(:WIN32OLE_RECORD)
   def rbcomtest_exist?
     exist = false
     begin

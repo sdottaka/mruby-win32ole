@@ -7,7 +7,7 @@ begin
   require 'win32ole' unless Module.const_defined?(:WIN32OLE) unless Module.const_defined?(:WIN32OLE)
 rescue LoadError
 end
-if defined?(WIN32OLE)
+if Module.const_defined?(:WIN32OLE)
   require 'mkmf'
   require 'pathname'
   require 'test/unit'

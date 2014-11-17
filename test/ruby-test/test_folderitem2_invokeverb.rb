@@ -8,7 +8,7 @@ rescue LoadError
 end
 require 'test/unit'
 
-if defined?(WIN32OLE)
+if Module.const_defined?(:WIN32OLE)
   class TestInvokeVerb < Test::Unit::TestCase
     def setup
       # make dummy file for InvokeVerb test.

@@ -7,7 +7,7 @@ rescue LoadError
 end
 require 'test/unit'
 
-if defined?(WIN32OLE)
+if Module.const_defined?(:WIN32OLE)
   class TestWIN32OLE_FOR_PROPERTYPUTREF < Test::Unit::TestCase
 
     def setup
