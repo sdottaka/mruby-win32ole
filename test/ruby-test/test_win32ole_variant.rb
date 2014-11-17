@@ -39,8 +39,7 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
       ex = nil
       begin
         WIN32OLE_VARIANT.new
-      rescue ArgumentError
-        ex = $!
+      rescue ArgumentError => ex
       end
       assert_instance_of(ArgumentError, ex)
       assert_equal("wrong number of arguments (0 for 1..3)", ex.message);
@@ -50,8 +49,7 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
       ex = nil
       begin
         WIN32OLE_VARIANT.new('foo')
-      rescue
-        ex = $!
+      rescue => ex
       end
       assert_equal(nil, ex);
     end
