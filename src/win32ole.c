@@ -479,7 +479,7 @@ rbtime2vtdate(mrb_state *mrb, mrb_value tmobj)
 {
     SYSTEMTIME st;
     double t;
-    double nsec;
+    double usec;
 
     st.wYear = FIX2INT(mrb_funcall(mrb, tmobj, "year", 0));
     st.wMonth = FIX2INT(mrb_funcall(mrb, tmobj, "month", 0));
@@ -495,11 +495,11 @@ rbtime2vtdate(mrb_state *mrb, mrb_value tmobj)
      * wMilliseconds of SYSTEMTIME struct.
      * So, we need to calculate milliseconds by ourselves.
      */
-    nsec =  FIX2INT(mrb_funcall(mrb, tmobj, "nsec", 0));
-    nsec /= 1000000.0;
-    nsec /= (24.0 * 3600.0);
-    nsec /= 1000;
-    return t + nsec;
+    usec =  FIX2INT(mrb_funcall(mrb, tmobj, "usec", 0));
+    usec /= 1000.0;
+    usec /= (24.0 * 3600.0);
+    usec /= 1000;
+    return t + usec;
 }
 
 static mrb_value
