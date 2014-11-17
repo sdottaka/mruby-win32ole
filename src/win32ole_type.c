@@ -285,6 +285,9 @@ foletype_initialize(mrb_state *mrb, mrb_value self)
 
     mrb_get_args(mrb, "SS", &typelib, &oleclass);
 
+    poletype = oletypedata_alloc(mrb);
+    mrb_data_init(self, poletype, &oletype_datatype);
+
     file = typelib_file(mrb, typelib);
     if (mrb_nil_p(file)) {
         file = typelib;
@@ -300,9 +303,6 @@ foletype_initialize(mrb_state *mrb, mrb_value self)
                  oleclass, typelib);
     }
     OLE_RELEASE(pTypeLib);
-
-    poletype = oletypedata_alloc(mrb);
-    mrb_data_init(self, poletype, &oletype_datatype);
 
     return self;
 }
