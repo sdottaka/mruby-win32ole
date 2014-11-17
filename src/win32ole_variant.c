@@ -297,7 +297,7 @@ folevariant_s_array(mrb_state *mrb, mrb_value klass)
     ole_initialize(mrb);
 
     vt = (vt | VT_ARRAY);
-    obj = folevariant_s_allocate(mrb, mrb_class(mrb, klass));
+    obj = folevariant_s_allocate(mrb, mrb_class_ptr(klass));
 
     Data_Get_Struct(mrb, obj, &olevariant_datatype, pvar);
     dim = RARRAY_LEN(elems);

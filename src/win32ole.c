@@ -1988,7 +1988,7 @@ ole_bind_obj(mrb_state *mrb, mrb_value moniker, int argc, mrb_value *argv, mrb_v
                   "failed to bind moniker `%s'",
                   mrb_string_value_ptr(mrb, moniker));
     }
-    return create_win32ole_object(mrb, mrb_obj_class(mrb, self), pDispatch, argc, argv);
+    return create_win32ole_object(mrb, mrb_class_ptr(self), pDispatch, argc, argv);
 }
 
 /*
@@ -2052,7 +2052,7 @@ fole_s_connect(mrb_state *mrb, mrb_value self)
 
     OLE_RELEASE(pUnknown);
 
-    return create_win32ole_object(mrb, mrb_obj_class(mrb, self), pDispatch, argc, argv);
+    return create_win32ole_object(mrb, mrb_class_ptr(self), pDispatch, argc, argv);
 }
 
 /*
