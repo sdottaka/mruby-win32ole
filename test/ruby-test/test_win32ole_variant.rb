@@ -390,8 +390,8 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
       # Date is "2014/8/27 12:34:56.789"
       obj = WIN32OLE_VARIANT.new(41878.524268391200167, WIN32OLE::VARIANT::VT_DATE)
       t = obj.value
-      assert_equal("2014-08-27 12:34:56", t.strftime('%Y-%m-%d %H:%M:%S'))
-      assert_in_delta(0.789, t.nsec / 1000000000.0, 0.001)
+      assert_equal("2014-08-27 12:34:56", sprintf("%04d-%02d-%02d %02d:%02d:%02d", t.year, t.mon, t.mday, t.hour, t.min, t.sec))
+      assert_in_delta(0.789, t.usec / 1000000.0, 0.001)
     end
 
     def test_conversion_time2date_with_msec
@@ -399,16 +399,18 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
       t0 += 0.789
       t1 = WIN32OLE_VARIANT.new(t0).value
 
+      def t2s(t); sprintf("%04d-%02d-%02dT%02d:%02d:%02d.%06d", t.year, t.mon, t.mday, t.hour, t.min, t.sec, t.usec); end
+
       # The t0.nsec is 789000000 and t1.nsec is 789000465
       # because of error range by conversion Time between VT_DATE Variant.
       # So check t1 and t0 are in error by less than one millisecond.
-      msg = "Expected:#{t0.strftime('%Y-%m-%dT%H:%M:%S.%N')} but was:#{t1.strftime('%Y-%m-%dT%H:%M:%S.%N')}"
+      msg = "Expected:#{t2s(t0)} but was:#{t2s(t1)}"
       assert_in_delta(t0, t1, 0.001, msg)
 
       t0 = Time.new(2014, 8, 27, 12, 34, 56)
       t0 += 0.999999999
       t1 = WIN32OLE_VARIANT.new(t0).value
-      msg = "Expected:#{t0.strftime('%Y-%m-%dT%H:%M:%S.%N')} but was:#{t1.strftime('%Y-%m-%dT%H:%M:%S.%N')}"
+      msg = "Expected:#{t2s(t0)} but was:#{t2s(t1)}"
 
       # The t0 is "2014/08/27 12:34.56.999999999" and
       # the t1 is "2014/08/27 12:34:57.000000628"
@@ -416,7 +418,7 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
 
       t0 = Time.now
       t1 = WIN32OLE_VARIANT.new(t0).value
-      msg = "Expected:#{t0.strftime('%Y-%m-%dT%H:%M:%S.%N')} but was:#{t1.strftime('%Y-%m-%dT%H:%M:%S.%N')}"
+      msg = "Expected:#{t2s(t0)} but was:#{t2s(t1)}"
       assert_in_delta(t0, t1, 0.001, msg)
     end
 
