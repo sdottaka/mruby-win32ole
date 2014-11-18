@@ -221,6 +221,7 @@ create_win32ole_record(mrb_state *mrb, IRecordInfo *pri, void *prec)
 static void
 olerecord_free(mrb_state *mrb, void *ptr) {
     struct olerecorddata *pvar = ptr;
+    if (!ptr) return;
     OLE_FREE(pvar->pri);
     if (pvar->pdata) {
         mrb_free(mrb, pvar->pdata);

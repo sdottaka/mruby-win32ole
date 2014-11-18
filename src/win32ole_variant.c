@@ -32,6 +32,7 @@ static void
 olevariant_free(mrb_state *mrb, void *ptr)
 {
     struct olevariantdata *pvar = ptr;
+    if (!ptr) return;
     VariantClear(&(pvar->realvar));
     VariantClear(&(pvar->var));
     mrb_free(mrb, pvar);

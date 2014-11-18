@@ -875,6 +875,7 @@ static void
 ole_event_free(mrb_state *mrb, void *ptr)
 {
     struct oleeventdata *poleev = (struct oleeventdata *)ptr;
+    if (!ptr) return;
     if (ole_initialized())
     {
         if (poleev->pConnectionPoint) {
@@ -883,7 +884,7 @@ ole_event_free(mrb_state *mrb, void *ptr)
             poleev->pConnectionPoint = NULL;
         }
         OLE_RELEASE(poleev->pDispatch);
-	}
+    }
     mrb_free(mrb, poleev);
 }
 

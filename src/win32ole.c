@@ -886,6 +886,7 @@ static void
 ole_free(mrb_state *mrb, void *ptr)
 {
     struct oledata *pole = (struct oledata *)ptr;
+    if (!ptr) return;
     OLE_FREE(pole->pDispatch);
     mrb_free(mrb, pole);
 }

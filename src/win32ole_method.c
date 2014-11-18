@@ -50,6 +50,7 @@ static void
 olemethod_free(mrb_state *mrb, void *ptr)
 {
     struct olemethoddata *polemethod = ptr;
+    if (!ptr) return;
     OLE_FREE(polemethod->pTypeInfo);
     OLE_FREE(polemethod->pOwnerTypeInfo);
     free(polemethod);

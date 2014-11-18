@@ -35,6 +35,7 @@ static void
 oleparam_free(mrb_state *mrb, void *ptr)
 {
     struct oleparamdata *pole = ptr;
+    if (!ptr) return;
     OLE_FREE(pole->pTypeInfo);
     mrb_free(mrb, pole);
 }

@@ -30,6 +30,7 @@ static void
 olevariable_free(mrb_state *mrb, void *ptr)
 {
     struct olevariabledata *polevar = ptr;
+    if (!ptr) return;
     OLE_FREE(polevar->pTypeInfo);
     mrb_free(mrb, polevar);
 }

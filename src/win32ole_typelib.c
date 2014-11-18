@@ -196,6 +196,7 @@ static void
 oletypelib_free(mrb_state *mrb, void *ptr)
 {
     struct oletypelibdata *poletypelib = ptr;
+    if (!ptr) return;
     OLE_FREE(poletypelib->pTypeLib);
     mrb_free(mrb, poletypelib);
 }
