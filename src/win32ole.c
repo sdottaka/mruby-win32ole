@@ -3415,7 +3415,7 @@ fole_missing(mrb_state *mrb, mrb_value self)
     mrb_get_args(mrb, "*", &argv, &argc);
     if (argc < 1)
         mrb_raisef(mrb, E_ARGUMENT_ERROR, "wrong number of arguments (%S for 1..)", mrb_fixnum_value(argc));
-    id = mrb_symbol(argv[0]);
+    id = mrb_symbol_p(argv[0]) ? mrb_symbol(argv[0]) : mrb_intern_str(mrb, mrb_string_type(mrb, argv[0]));
     mname = mrb_sym2name(mrb, id);
     if(!mname) {
         mrb_raise(mrb, E_RUNTIME_ERROR, "fail: unknown method or property");

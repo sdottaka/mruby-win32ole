@@ -466,11 +466,13 @@ folerecord_method_missing(mrb_state *mrb, mrb_value self)
     int argc;
     mrb_value *argv;
     mrb_value name;
+    mrb_sym id;
     mrb_get_args(mrb, "*", &argv, &argc);
     if (argc < 1 || argc > 2)
         mrb_raisef(mrb, E_ARGUMENT_ERROR, "wrong number of arguments (%S for 1..2)", mrb_fixnum_value(argc));
 
-    name = mrb_sym2str(mrb, mrb_symbol(argv[0]));
+    id = mrb_symbol_p(argv[0]) ? mrb_symbol(argv[0]) : mrb_intern_str(mrb, mrb_string_type(mrb, argv[0]));
+    name = mrb_sym2str(mrb, id);
 
 #if SIZEOF_SIZE_T > SIZEOF_LONG
     {
