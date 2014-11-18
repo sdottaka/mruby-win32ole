@@ -607,8 +607,8 @@ find_coclass(
     ITypeLib *pTypeLib;
     int count;
     BOOL found = FALSE;
-    ITypeInfo *pTypeInfo2;
-    TYPEATTR *pTypeAttr2;
+    ITypeInfo *pTypeInfo2 = NULL;
+    TYPEATTR *pTypeAttr2 = NULL;
     int flags;
     int i,j;
     HREFTYPE href;
@@ -716,9 +716,9 @@ find_default_source(mrb_state *mrb, mrb_value ole, IID *piid, ITypeInfo **ppType
     void *p;
 
     IDispatch *pDispatch;
-    ITypeInfo *pTypeInfo;
+    ITypeInfo *pTypeInfo = NULL;
     ITypeInfo *pTypeInfo2 = NULL;
-    TYPEATTR *pTypeAttr;
+    TYPEATTR *pTypeAttr = NULL;
     TYPEATTR *pTypeAttr2 = NULL;
 
     struct oledata *pole;
