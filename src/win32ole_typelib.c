@@ -391,6 +391,8 @@ oletypelib_search_registry2(mrb_state *mrb, mrb_value self, mrb_value typelibnam
 static mrb_value
 foletypelib_initialize(mrb_state *mrb, mrb_value self)
 {
+    int argc;
+    mrb_value argv;
     mrb_value major_ver = mrb_nil_value();
     mrb_value minor_ver = mrb_nil_value();
     mrb_value found = mrb_false_value();
@@ -405,6 +407,10 @@ foletypelib_initialize(mrb_state *mrb, mrb_value self)
     }
     mrb_data_init(self, NULL, &oletypelib_datatype);
 
+    mrb_get_args(mrb, "*", &argv, &argc);
+    if (argc < 1 || argc > 3) {
+        mrb_raisef(mrb, E_ARGUMENT_ERROR, "wrong number of arguments (%S for 1..3)", INT2FIX(argc));
+    }
     mrb_get_args(mrb, "S|oo", &typelib, &major_ver, &minor_ver);
 
     ptlib = oletypelibdata_alloc(mrb);
