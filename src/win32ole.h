@@ -16,11 +16,16 @@
 #define FIX2INT(val) mrb_fixnum((val))
 #define INT2FIX(val) mrb_fixnum_value((val))
 #define INT2NUM(val) (FIXABLE((val)) ? mrb_fixnum_value((mrb_int)(val)) : mrb_float_value(mrb, (mrb_float)(val)))
-#define UINT2NUM(val) INT2NUM(val)
+#define UINT2NUM(val) INT2NUM((unsigned mrb_int)(val))
 #define NUM2CHR(val) ((mrb_string_p(val) && (RSTRING_LEN(val)>=1)) ? RSTRING_PTR(val)[0] : (char)(NUM2INT(val) & 0xff))
-#define NUM2INT(val) (mrb_int(mrb, (val)))
-#define NUM2UINT(val) ((unsigned)mrb_int(mrb, (val)))
+#define TO_PDT(val) ((mrb_type((val)) == MRB_TT_FLOAT) ? mrb_float((val)) : mrb_int(mrb, (val)))
+#define NUM2INT(val) ((mrb_int)TO_PDT((val)))
+#define NUM2UINT(val) ((unsigned mrb_int)TO_PDT((val)))
 #define NUM2LONG(val) (mrb_int(mrb, (val)))
+#define LL2NUM(val) INT2NUM((val))
+#define ULL2NUM(val) INT2NUM((unsigned __int64)(val))
+#define NUM2LL(val) ((__int64)(TO_PDT((val))))
+#define NUM2ULL(val) ((unsigned __int64)(TO_PDT((val))))
 #define NUM2DBL(val) (mrb_to_flo(mrb, (val)))
 #define ALLOC(type) ((type*)mrb_malloc(mrb, sizeof(type)))
 #define ALLOC_N(type, n) ((type *)mrb_malloc(mrb, sizeof(type) * (n)))
@@ -106,7 +111,7 @@
 #define V_UINTREF(X) V_UNION(X, puintVal)
 #endif
 
-#ifdef HAVE_LONG_LONG
+#if defined(HAVE_LONG_LONG) || defined(__int64) || defined(_MSC_VER)
 #define I8_2_NUM LL2NUM
 #define UI8_2_NUM ULL2NUM
 #define NUM2I8  NUM2LL
