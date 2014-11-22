@@ -117,14 +117,14 @@ static BOOL g_lcid_installed = FALSE;
 static HINSTANCE ghhctrl = NULL;
 static HINSTANCE gole32 = NULL;
 static FNCOCREATEINSTANCEEX *gCoCreateInstanceEx = NULL;
-#define com_hash mrb_gv_get(mrb, mrb_intern_lit(mrb, "win32ole_com_hash"))
+#define com_hash mrb_obj_iv_get(mrb, (struct RObject *)mrb->object_class, mrb_intern_lit(mrb, "_win32ole_com_hash"))
 static IDispatchVtbl com_vtbl;
 static UINT cWIN32OLE_cp = CP_ACP;
 static mrb_encoding *cWIN32OLE_enc;
 static UINT g_cp_to_check = CP_ACP;
 static char g_lcid_to_check[8 + 1];
 static VARTYPE g_nil_to = VT_ERROR;
-#define enc2cp_table mrb_gv_get(mrb, mrb_intern_lit(mrb, "win32ole_enc2cp_table"))
+#define enc2cp_table mrb_obj_iv_get(mrb, (struct RObject *)mrb->object_class, mrb_intern_lit(mrb, "_win32ole_enc2cp_table"))
 static IMessageFilterVtbl message_filter;
 static IMessageFilter imessage_filter = { &message_filter };
 static IMessageFilter* previous_filter;
@@ -3997,7 +3997,7 @@ typelib_from_val(mrb_state *mrb, mrb_value obj, ITypeLib **pTypeLib)
 static void
 init_enc2cp(mrb_state *mrb)
 {
-    mrb_gv_set(mrb, mrb_intern_lit(mrb, "win32ole_enc2cp_table"), mrb_hash_new(mrb));
+    mrb_obj_iv_set(mrb, (struct RObject *)mrb->object_class, mrb_intern_lit(mrb, "_win32ole_enc2cp_table"), mrb_hash_new(mrb));
 }
 
 static void
@@ -4028,7 +4028,7 @@ mrb_mruby_win32ole_gem_init(mrb_state* mrb)
     message_filter.RetryRejectedCall = mf_RetryRejectedCall;
     message_filter.MessagePending = mf_MessagePending;
 
-    mrb_gv_set(mrb, mrb_intern_lit(mrb, "win32ole_com_hash"), mrb_hash_new(mrb));
+    mrb_obj_iv_set(mrb, (struct RObject *)mrb->object_class, mrb_intern_lit(mrb, "_win32ole_com_hash"), mrb_hash_new(mrb));
 
     cWIN32OLE = mrb_define_class(mrb, "WIN32OLE", mrb->object_class);
 

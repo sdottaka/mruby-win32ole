@@ -63,7 +63,7 @@ struct oleeventdata {
     long event_id;
 };
 
-#define ary_ole_event (mrb_gv_get(mrb, mrb_intern_lit(mrb, "win32ole_ary_ole_event")))
+#define ary_ole_event (mrb_obj_iv_get(mrb, (struct RObject *)mrb->object_class, mrb_intern_lit(mrb, "_win32ole_ary_ole_event")))
 #define id_events (mrb_intern_lit(mrb, "events"))
 
 static BOOL g_IsEventSinkVtblInitialized = FALSE;
@@ -1306,7 +1306,7 @@ void
 Init_win32ole_event(mrb_state *mrb)
 {
     struct RClass *cWIN32OLE_EVENT;
-    mrb_gv_set(mrb, mrb_intern_lit(mrb, "win32ole_ary_ole_event"), mrb_ary_new(mrb));
+    mrb_obj_iv_set(mrb, (struct RObject *)mrb->object_class, mrb_intern_lit(mrb, "_win32ole_ary_ole_event"), mrb_ary_new(mrb));
     cWIN32OLE_EVENT = mrb_define_class(mrb, "WIN32OLE_EVENT", mrb->object_class);
     mrb_define_class_method(mrb, cWIN32OLE_EVENT, "message_loop", fev_s_msg_loop, MRB_ARGS_NONE());
     MRB_SET_INSTANCE_TT(cWIN32OLE_EVENT, MRB_TT_DATA);
