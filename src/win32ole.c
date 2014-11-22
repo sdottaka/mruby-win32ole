@@ -846,12 +846,13 @@ ole_excepinfo2msg(mrb_state *mrb, EXCEPINFO *pExInfo)
     return error_msg;
 }
 
-void
+int
 ole_uninitialize(void)
 {
-    if (!g_ole_initialized) return;
+    if (!g_ole_initialized) return -1;
     OleUninitialize();
     g_ole_initialized_set(FALSE);
+    return 0;
 }
 
 void
@@ -864,6 +865,8 @@ ole_initialize(mrb_state *mrb)
 	rb_add_event_hook(ole_uninitialize_hook, RUBY_EVENT_THREAD_END, mrb_nil_value());
 */
 /* */
+      _onexit(ole_uninitialize);
+
 	g_uninitialize_hooked = TRUE;
     }
 
@@ -4181,6 +4184,5 @@ void
 mrb_mruby_win32ole_gem_final(mrb_state* mrb)
 {
 	free_enc2cp(mrb);
-	ole_uninitialize();
 }
 
