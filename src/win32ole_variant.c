@@ -403,7 +403,7 @@ check_type_val2variant(mrb_state *mrb, mrb_value val)
 static mrb_value
 folevariant_initialize(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     int len = 0;
     VARIANT var;
@@ -520,7 +520,7 @@ unlock_safe_array(mrb_state *mrb, SAFEARRAY *psa)
 static mrb_value
 folevariant_ary_aref(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     struct olevariantdata *pvar;
     SAFEARRAY *psa;
@@ -580,7 +580,7 @@ folevariant_ary_aref(mrb_state *mrb, mrb_value self)
 static mrb_value
 folevariant_ary_aset(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     struct olevariantdata *pvar;
     SAFEARRAY *psa;

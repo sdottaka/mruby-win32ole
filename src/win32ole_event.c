@@ -88,12 +88,12 @@ static mrb_value ole_search_event(mrb_state *mrb, mrb_value ary, mrb_value ev, B
 static mrb_sym ole_search_handler_method(mrb_state *mrb, mrb_value handler, mrb_value ev, BOOL *is_default_handler);
 static void ole_delete_event(mrb_state *mrb, mrb_value ary, mrb_value ev);
 static void ole_event_free(mrb_state *mrb, void *ptr);
-static mrb_value ev_advise(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self);
+static mrb_value ev_advise(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self);
 static mrb_value fev_initialize(mrb_state *mrb, mrb_value self);
 static void ole_msg_loop(void);
 static mrb_value fev_s_msg_loop(mrb_state *mrb, mrb_value klass);
 static void add_event_call_back(mrb_state *mrb, mrb_value obj, mrb_value event, mrb_value data);
-static mrb_value ev_on_event(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self, mrb_value is_ary_arg, mrb_value block);
+static mrb_value ev_on_event(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self, mrb_value is_ary_arg, mrb_value block);
 static mrb_value fev_on_event(mrb_state *mrb, mrb_value self);
 static mrb_value fev_on_event_with_outargs(mrb_state *mrb, mrb_value self);
 static mrb_value fev_off_event(mrb_state *mrb, mrb_value self);
@@ -900,7 +900,7 @@ oleeventdata_alloc(mrb_state *mrb)
 }
 
 static mrb_value
-ev_advise(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self)
+ev_advise(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self)
 {
 
     mrb_value ole, itf;
@@ -995,7 +995,7 @@ ev_advise(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self)
 static mrb_value
 fev_initialize(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     struct oleeventdata *poleev = (struct oleeventdata *)DATA_PTR(self);
     if (poleev) {
@@ -1051,7 +1051,7 @@ add_event_call_back(mrb_state *mrb, mrb_value obj, mrb_value event, mrb_value da
 }
 
 static mrb_value
-ev_on_event(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self, mrb_value is_ary_arg, mrb_value block)
+ev_on_event(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self, mrb_value is_ary_arg, mrb_value block)
 {
     struct oleeventdata *poleev;
     mrb_value event, args, data;
@@ -1114,7 +1114,7 @@ ev_on_event(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self, mrb_value
 static mrb_value
 fev_on_event(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_value block;
     mrb_get_args(mrb, "*&", &argv, &argc, &block);
@@ -1138,7 +1138,7 @@ fev_on_event(mrb_state *mrb, mrb_value self)
 static mrb_value
 fev_on_event_with_outargs(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_value block;
     mrb_get_args(mrb, "*&", &argv, &argc, &block);

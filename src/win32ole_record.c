@@ -463,7 +463,7 @@ olerecord_ivar_set(mrb_state *mrb, mrb_value self, mrb_value name, mrb_value val
 static mrb_value
 folerecord_method_missing(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_value name;
     mrb_sym id;

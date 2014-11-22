@@ -144,7 +144,7 @@ static mrb_value
 foleparam_initialize(mrb_state *mrb, mrb_value self)
 {
     mrb_value olemethod;
-    int idx;
+    mrb_int idx;
     struct oleparamdata *pparam = (struct oleparamdata *)DATA_PTR(self);
     if (pparam) {
         mrb_free(mrb, pparam);

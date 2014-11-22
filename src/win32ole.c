@@ -172,13 +172,13 @@ static long ary_len_of_dim(mrb_value ary, long dim);
 static mrb_value ole_set_member(mrb_state *mrb, mrb_value self, IDispatch *dispatch);
 static struct oledata *oledata_alloc(mrb_state *mrb);
 static mrb_value fole_s_allocate(mrb_state *mrb, struct RClass *klass);
-static mrb_value create_win32ole_object(mrb_state *mrb, struct RClass *klass, IDispatch *pDispatch, int argc, mrb_value *argv);
+static mrb_value create_win32ole_object(mrb_state *mrb, struct RClass *klass, IDispatch *pDispatch, mrb_int argc, mrb_value *argv);
 static mrb_value ary_new_dim(mrb_state *mrb, mrb_value myary, LONG *pid, LONG *plb, LONG dim);
 static void ary_store_dim(mrb_state *mrb, mrb_value myary, LONG *pid, LONG *plb, LONG dim, mrb_value val);
 static void ole_const_load(mrb_state *mrb, ITypeLib *pTypeLib, mrb_value klass, mrb_value self);
 static HRESULT clsid_from_remote(mrb_state *mrb, mrb_value host, mrb_value com, CLSID *pclsid);
 static mrb_value ole_create_dcom(mrb_state *mrb, mrb_value self, mrb_value ole, mrb_value host, mrb_value others);
-static mrb_value ole_bind_obj(mrb_state *mrb, mrb_value moniker, int argc, mrb_value *argv, mrb_value self);
+static mrb_value ole_bind_obj(mrb_state *mrb, mrb_value moniker, mrb_int argc, mrb_value *argv, mrb_value self);
 static mrb_value fole_s_connect(mrb_state *mrb, mrb_value self);
 static mrb_value fole_s_const_load(mrb_state *mrb, mrb_value self);
 static ULONG reference_count(struct oledata * pole);
@@ -200,7 +200,7 @@ static mrb_value fole_s_ole_uninitialize(mrb_state *mrb, mrb_value self);
 static mrb_value fole_initialize(mrb_state *mrb, mrb_value self);
 static int hash2named_arg(mrb_state *mrb, mrb_value key, mrb_value val, struct oleparam* pOp);
 static mrb_value set_argv(mrb_state *mrb, VARIANTARG* realargs, unsigned int beg, unsigned int end);
-static mrb_value ole_invoke(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self, USHORT wFlags, BOOL is_bracket);
+static mrb_value ole_invoke(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self, USHORT wFlags, BOOL is_bracket);
 static mrb_value fole_invoke(mrb_state *mrb, mrb_value self);
 static mrb_value ole_invoke2(mrb_state *mrb, mrb_value self, mrb_value dispid, mrb_value args, mrb_value types, USHORT dispkind);
 static mrb_value fole_invoke2(mrb_state *mrb, mrb_value self);
@@ -1319,10 +1319,26 @@ ole_val2variant(mrb_state *mrb, mrb_value val, VARIANT *var)
         V_VT(var) = VT_BSTR;
         V_BSTR(var) = ole_vstr2wc(mrb, val);
         break;
+#ifndef MRB_INT64
     case MRB_TT_FIXNUM:
         V_VT(var) = VT_I4;
         V_I4(var) = NUM2INT(val);
         break;
+#else
+    case MRB_TT_FIXNUM:
+    {
+        mrb_int fnval = mrb_fixnum(val);
+        if (fnval <= INT_MAX && fnval >= INT_MIN) {
+            V_VT(var) = VT_I4;
+            V_I4(var) = NUM2INT(val);
+        }
+         else {
+            V_VT(var) = VT_I8;
+            V_I8(var) = NUM2INT(val);
+        }
+        break;
+    }
+#endif
 /*
     FIXME:
     case MRB_TT_BIGNUM:
@@ -1418,7 +1434,7 @@ fole_s_allocate(mrb_state *mrb, struct RClass *klass)
 }
 
 static mrb_value
-create_win32ole_object(mrb_state *mrb, struct RClass *klass, IDispatch *pDispatch, int argc, mrb_value *argv)
+create_win32ole_object(mrb_state *mrb, struct RClass *klass, IDispatch *pDispatch, mrb_int argc, mrb_value *argv)
 {
     mrb_value obj = fole_s_allocate(mrb, klass);
     ole_set_member(mrb, obj, pDispatch);
@@ -1954,7 +1970,7 @@ ole_create_dcom(mrb_state *mrb, mrb_value self, mrb_value ole, mrb_value host, m
 }
 
 static mrb_value
-ole_bind_obj(mrb_state *mrb, mrb_value moniker, int argc, mrb_value *argv, mrb_value self)
+ole_bind_obj(mrb_state *mrb, mrb_value moniker, mrb_int argc, mrb_value *argv, mrb_value self)
 {
     IBindCtx *pBindCtx;
     IMoniker *pMoniker;
@@ -2007,7 +2023,7 @@ ole_bind_obj(mrb_state *mrb, mrb_value moniker, int argc, mrb_value *argv, mrb_v
 static mrb_value
 fole_s_connect(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_value svr_name;
     HRESULT hr;
@@ -2318,9 +2334,9 @@ code_page_installed(UINT cp)
 static mrb_value
 fole_s_set_code_page(mrb_state *mrb, mrb_value self)
 {
-    UINT cp;
+    mrb_int cp;
     mrb_get_args(mrb, "i", &cp);
-    set_ole_codepage(mrb, cp);
+    set_ole_codepage(mrb, (UINT)cp);
     /*
      * Should this method return old codepage?
      */
@@ -2374,8 +2390,10 @@ lcid_installed(LCID lcid)
 static mrb_value
 fole_s_set_locale(mrb_state *mrb, mrb_value self)
 {
+    mrb_int ilcid;
     LCID lcid;
-    mrb_get_args(mrb, "i", &lcid);
+    mrb_get_args(mrb, "i", &ilcid);
+    lcid = ilcid;
     if (lcid_installed(lcid)) {
         cWIN32OLE_lcid = lcid;
     } else {
@@ -2501,7 +2519,7 @@ fole_s_ole_uninitialize(mrb_state *mrb, mrb_value self)
 static mrb_value
 fole_initialize(mrb_state *mrb, mrb_value self)
 {
-    int argc = 0;
+    mrb_int argc = 0;
     mrb_value *argv;
     mrb_value svr_name;
     mrb_value host = mrb_nil_value();
@@ -2622,7 +2640,7 @@ set_argv(mrb_state *mrb, VARIANTARG* realargs, unsigned int beg, unsigned int en
 }
 
 static mrb_value
-ole_invoke(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self, USHORT wFlags, BOOL is_bracket)
+ole_invoke(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self, USHORT wFlags, BOOL is_bracket)
 {
     LCID    lcid = cWIN32OLE_lcid;
     struct oledata *pole;
@@ -2883,7 +2901,7 @@ ole_invoke(mrb_state *mrb, int argc, mrb_value *argv, mrb_value self, USHORT wFl
 static mrb_value
 fole_invoke(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_get_args(mrb, "*", &argv, &argc);
     return ole_invoke(mrb, argc, argv, self, DISPATCH_METHOD|DISPATCH_PROPERTYGET, FALSE);
@@ -3115,7 +3133,7 @@ static mrb_value
 fole_getproperty2(mrb_state *mrb, mrb_value self)
 {
     mrb_value dispid, args, types;
-    mrb_get_args(mrb, "iAA", &dispid, &args, &types);
+    mrb_get_args(mrb, "oAA", &dispid, &args, &types);
     return ole_invoke2(mrb, self, dispid, args, types, DISPATCH_PROPERTYGET);
 }
 
@@ -3135,7 +3153,7 @@ static mrb_value
 fole_setproperty2(mrb_state *mrb, mrb_value self)
 {
     mrb_value dispid, args, types;
-    mrb_get_args(mrb, "iAA", &dispid, &args, &types);
+    mrb_get_args(mrb, "oAA", &dispid, &args, &types);
     return ole_invoke2(mrb, self, dispid, args, types, DISPATCH_PROPERTYPUT);
 }
 
@@ -3160,7 +3178,7 @@ fole_setproperty2(mrb_state *mrb, mrb_value self)
 static mrb_value
 fole_setproperty_with_bracket(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_get_args(mrb, "*", &argv, &argc);
     return ole_invoke(mrb, argc, argv, self, DISPATCH_PROPERTYPUT, TRUE);
@@ -3182,7 +3200,7 @@ fole_setproperty_with_bracket(mrb_state *mrb, mrb_value self)
 static mrb_value
 fole_setproperty(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_get_args(mrb, "*", &argv, &argc);
     return ole_invoke(mrb, argc, argv, self, DISPATCH_PROPERTYPUT, FALSE);
@@ -3207,7 +3225,7 @@ fole_setproperty(mrb_state *mrb, mrb_value self)
 static mrb_value
 fole_getproperty_with_bracket(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_get_args(mrb, "*", &argv, &argc);
     return ole_invoke(mrb, argc, argv, self, DISPATCH_PROPERTYGET, TRUE);
@@ -3410,7 +3428,7 @@ fole_each(mrb_state *mrb, mrb_value self)
 static mrb_value
 fole_missing(mrb_state *mrb, mrb_value self)
 {
-    int argc;
+    mrb_int argc;
     mrb_value *argv;
     mrb_sym id;
     const char* mname;
