@@ -113,8 +113,12 @@ if Module.const_defined?(:WIN32OLE_METHOD)
     end
 
     def test_offset_vtbl
-      exp = is_ruby64? ? 48 : 24
-      assert_equal(exp, @m_invoke.offset_vtbl)
+      if Module.const_defined?(:RUBY_PLATFORM)
+        exp = is_ruby64? ? 48 : 24
+        assert_equal(exp, @m_invoke.offset_vtbl)
+      else
+        assert_true(@m_invoke.offset_vtbl == 24 || @m_invoke.offset_vtbl == 48)
+      end
     end
 
     def test_size_params

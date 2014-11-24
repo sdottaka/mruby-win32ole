@@ -331,6 +331,8 @@ if Module.const_defined?(:WIN32OLE_EVENT)
       end
 
       def test_s_new_exc_tainted
+        skip "mruby-thread is required to test this case" unless Module.const_defined?(:Thread)
+        skip "security model not supported" unless Module.const_defined?(:SecurityError) 
         th = Thread.new {
           $SAFE=1
           str = 'ConnectionEvents'

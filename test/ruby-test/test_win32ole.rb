@@ -7,6 +7,23 @@ end
 require 'test/unit'
 
 if Module.const_defined?(:WIN32OLE)
+  unless "".respond_to?(:force_encoding)
+    class String
+      def force_encoding(str)
+        self
+      end
+    end
+  end
+
+  if Module.const_defined?(:MRUBY_VERSION)
+    module Kernel
+      alias :org_open open
+      def open(filename, mode, &blk)
+        org_open filename, mode[0...mode.index(":")] {|f| blk.call(f) }
+      end
+    end
+  end
+
   module CONST1
   end
   module CONST2
@@ -170,7 +187,10 @@ if Module.const_defined?(:WIN32OLE)
     end
 
     def test_s_new_exc_svr_tainted
-      th = Thread.start {
+      skip "mruby-thread is required to test this case" unless Module.const_defined?(:Thread)
+      skip "security model not supported" unless Module.const_defined?(:SecurityError) 
+
+      th = Thread.new {
         $SAFE = 1
         svr = "Scripting.Dictionary"
         svr.taint
@@ -183,7 +203,10 @@ if Module.const_defined?(:WIN32OLE)
     end
 
     def test_s_new_exc_host_tainted
-      th = Thread.start {
+      skip "mruby-thread is required to test this case" unless Module.const_defined?(:Thread)
+      skip "security model not supported" unless Module.const_defined?(:SecurityError) 
+
+      th = Thread.new {
         $SAFE = 1
         svr = "Scripting.Dictionary"
         host = "localhost"
@@ -222,7 +245,10 @@ if Module.const_defined?(:WIN32OLE)
     end
 
     def test_s_coonect_exc_tainted
-      th = Thread.start {
+      skip "mruby-thread is required to test this case" unless Module.const_defined?(:Thread)
+      skip "security model not supported" unless Module.const_defined?(:SecurityError) 
+
+      th = Thread.new {
         $SAFE = 1
         svr = "winmgmts:"
         svr.taint
@@ -334,19 +360,19 @@ if Module.const_defined?(:WIN32OLE)
     end
 
     def test_s_const_load
-      assert(!defined?(CONST1::SsfWINDOWS))
+      assert(!CONST1.const_defined?(:SsfWINDOWS))
       shell=WIN32OLE.new('Shell.Application')
       WIN32OLE.const_load(shell, CONST1)
       assert_equal(36, CONST1::SsfWINDOWS)
 
-      assert(!defined?(CONST2::SsfWINDOWS))
+      assert(!CONST2.const_defined?(:SsfWINDOWS))
       WIN32OLE.const_load("Microsoft Shell Controls And Automation", CONST2)
       assert_equal(36, CONST2::SsfWINDOWS)
     end
 
     def test_s_create_guid
       guid = WIN32OLE.create_guid
-      assert_match(/^\{[A-Z0-9]{8}\-[A-Z0-9]{4}\-[A-Z0-9]{4}\-[A-Z0-9]{4}\-[A-Z0-9]{12}/,
+      assert_match(/^\{[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+\-[A-Z0-9]+}/,
                    guid)
     end
 
@@ -365,11 +391,15 @@ if Module.const_defined?(:WIN32OLE)
     end
 
     def test_s_codepage_changed
+      skip("mruby-pack is required to test this case") unless [].respond_to?(:pack)
+
       cp = WIN32OLE.codepage
       fso = WIN32OLE.new("Scripting.FileSystemObject")
       fname = fso.getTempName
       begin
-        obj = WIN32OLE_VARIANT.new([0x3042].pack("U*").force_encoding("UTF-8"))
+        ch = [0x3042].pack("U*").force_encoding("UTF-8")
+        ch = "\xE3\x81\x82" if ch == ""
+        obj = WIN32OLE_VARIANT.new(ch)
         WIN32OLE.codepage = WIN32OLE::CP_UTF8
         assert_equal("\xE3\x81\x82".force_encoding("CP65001"), obj.value)
 
@@ -391,7 +421,9 @@ if Module.const_defined?(:WIN32OLE)
 
         WIN32OLE.codepage = cp
         file = fso.opentextfile(fname, 2, true)
-        test_str = [0x3042].pack("U*").encode("UTF-16LE")
+        ch = [0x3042].pack("U*").force_encoding("UTF-16LE")
+        ch = "\x42\x30" if ch == ""
+        test_str = ch
         begin
           file.write test_str.force_encoding("UTF-16")
         ensure
@@ -408,6 +440,7 @@ if Module.const_defined?(:WIN32OLE)
           WIN32OLE.codepage = 20932
         rescue WIN32OLERuntimeError
         end
+        skip "mruby does not support Encoding" unless "".respond_to?(:encoding)
         if (WIN32OLE.codepage == 20932)
           WIN32OLE.codepage = cp
           file = fso.opentextfile(fname, 2, true)
@@ -431,9 +464,13 @@ if Module.const_defined?(:WIN32OLE)
     end
 
     def test_cp51932
+      skip("mruby-pack is required to test this case") unless [].respond_to?(:pack)
+
       cp = WIN32OLE.codepage
       begin
-        obj = WIN32OLE_VARIANT.new([0x3042].pack("U*").force_encoding("UTF-8"))
+        ch = [0x3042].pack("U*").force_encoding("UTF-8")
+        ch = "\x42\x30" if ch == ""
+        obj = WIN32OLE_VARIANT.new(ch)
         begin
           WIN32OLE.codepage = 51932
         rescue

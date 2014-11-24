@@ -76,8 +76,15 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
       assert_equal(WIN32OLE::VARIANT::VT_CY, obj.vartype)
 
       obj = WIN32OLE_VARIANT.new(nil, WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(1899,12,30), obj.value)
-      assert_equal(WIN32OLE::VARIANT::VT_DATE, obj.vartype)
+      t = nil
+      begin
+        t = Time.new(1899,12,30)
+      rescue
+      end
+      if t
+        assert_equal(Time.new(1899,12,30), obj.value)
+        assert_equal(WIN32OLE::VARIANT::VT_DATE, obj.vartype)
+      end
 
       obj = WIN32OLE_VARIANT.new(nil, WIN32OLE::VARIANT::VT_BSTR)
       assert_equal("", obj.value)
@@ -540,6 +547,10 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
       obj[0] = 71
       assert_equal("GEF", obj.value)
 
+      if ![].respond_to?(:pack)
+        skip("mruby-pack is required to test this case")
+      end
+
       obj = WIN32OLE_VARIANT.new([65, 0].pack("C*"), WIN32OLE::VARIANT::VT_ARRAY|WIN32OLE::VARIANT::VT_UI1)
       assert_equal([65, 0].pack("C*"), obj.value)
 
@@ -554,6 +565,9 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
     end
 
     def test_create_vt_array_int
+      if ![].respond_to?(:pack)
+        skip("mruby-pack is required to test this case")
+      end
       obj = WIN32OLE_VARIANT.new([65, 0], WIN32OLE::VARIANT::VT_ARRAY|WIN32OLE::VARIANT::VT_UI1)
       assert_equal([65, 0].pack("C*"), obj.value)
 
@@ -600,29 +614,39 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
     end
 
     def test_conversion_vt_date
-      obj = WIN32OLE_VARIANT.new(-657434, WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(100,1,1), obj.value)
+      t = nil
+      begin
+        t = Time.new(100,1,1)
+      rescue
+      end
+      if t
+        obj = WIN32OLE_VARIANT.new(-657434, WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(100,1,1), obj.value)
 
-      obj = WIN32OLE_VARIANT.new("1500/12/29 23:59:59", WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(1500,12,29,23,59,59), obj.value)
+        obj = WIN32OLE_VARIANT.new("1500/12/29 23:59:59", WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(1500,12,29,23,59,59), obj.value)
 
-      obj = WIN32OLE_VARIANT.new("1500/12/30 00:00:00", WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(1500,12,30), obj.value)
+        obj = WIN32OLE_VARIANT.new("1500/12/30 00:00:00", WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(1500,12,30), obj.value)
 
-      obj = WIN32OLE_VARIANT.new("1500/12/30 00:00:01", WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(1500,12,30,0,0,1), obj.value)
+        obj = WIN32OLE_VARIANT.new("1500/12/30 00:00:01", WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(1500,12,30,0,0,1), obj.value)
 
-      obj = WIN32OLE_VARIANT.new("1899/12/29 23:59:59", WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(1899,12,29,23,59,59), obj.value)
+        obj = WIN32OLE_VARIANT.new("1899/12/29 23:59:59", WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(1899,12,29,23,59,59), obj.value)
 
-      obj = WIN32OLE_VARIANT.new("1899/12/30 00:00:00", WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(1899,12,30), obj.value)
+        obj = WIN32OLE_VARIANT.new("1899/12/30 00:00:00", WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(1899,12,30), obj.value)
 
-      obj = WIN32OLE_VARIANT.new("1899/12/30 00:00:01", WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(1899,12,30,0,0,1), obj.value)
+        obj = WIN32OLE_VARIANT.new("1899/12/30 00:00:01", WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(1899,12,30,0,0,1), obj.value)
 
-      obj = WIN32OLE_VARIANT.new(0, WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(1899,12,30), obj.value)
+        obj = WIN32OLE_VARIANT.new(0, WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(1899,12,30), obj.value)
+
+        obj = WIN32OLE_VARIANT.new("9999/12/31 23:59:59", WIN32OLE::VARIANT::VT_DATE)
+        assert_equal(Time.new(9999,12,31,23,59,59), obj.value)
+      end
 
       obj = WIN32OLE_VARIANT.new("2008/12/29 23:59:59", WIN32OLE::VARIANT::VT_DATE)
       assert_equal(Time.new(2008,12,29,23,59,59), obj.value)
@@ -633,8 +657,6 @@ if Module.const_defined?(:WIN32OLE_VARIANT)
       obj = WIN32OLE_VARIANT.new("2008/12/30 00:00:01", WIN32OLE::VARIANT::VT_DATE)
       assert_equal(Time.new(2008,12,30,0,0,1), obj.value)
 
-      obj = WIN32OLE_VARIANT.new("9999/12/31 23:59:59", WIN32OLE::VARIANT::VT_DATE)
-      assert_equal(Time.new(9999,12,31,23,59,59), obj.value)
     end
 
     def test_create_nil_dispatch

@@ -1,4 +1,5 @@
-if Object.const_defined?(:MTest)
+GC.disable
+if Object.const_defined?(:MTest) && Kernel.respond_to?(:require) && Module.const_defined?(:Regexp)
   STDERR = Kernel unless Module.const_defined?(:STDERR)
   Test = MTest
 
@@ -14,26 +15,26 @@ if Object.const_defined?(:MTest)
   require "test_nil2vtempty.rb"
   require "test_ole_methods.rb"
   require "test_propertyputref.rb"
-#  require "test_thread.rb"
-#  require "test_win32ole.rb"
-#  require "test_win32ole_event.rb"
-#  require "test_win32ole_method.rb"
+  require "test_thread.rb"
+  require "test_win32ole.rb"
+  require "test_win32ole_event.rb"
+  require "test_win32ole_method.rb"
   require "test_win32ole_param.rb"
 #  require "test_win32ole_record.rb"
-#  require "test_win32ole_type.rb"
-#  require "test_win32ole_typelib.rb"
+  require "test_win32ole_type.rb"
+  require "test_win32ole_typelib.rb"
   require "test_win32ole_variable.rb"
-#  require "test_win32ole_variant.rb"
+  require "test_win32ole_variant.rb"
   require "test_win32ole_variant_m.rb"
-#  require "test_win32ole_variant_outarg.rb"
+  require "test_win32ole_variant_outarg.rb"
 
-#  re.pattern = "^test_.*\.rb"
-#  for i in fso.GetFolder(".").files
-#    if re.Test(i.name)
-#      puts i.name
-#      require i.name 
-#    end
-#  end
+  re.pattern = "^test_.*\.rb"
+  for i in fso.GetFolder(".").files
+    if re.Test(i.name)
+      puts i.name
+#      require i.name
+    end
+  end
 
   if $ok_test
     MTest::Unit.new.mrbtest
