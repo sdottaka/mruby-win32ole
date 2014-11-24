@@ -33,6 +33,7 @@ recordinfo_from_itypelib(mrb_state *mrb, ITypeLib *pTypeLib, mrb_value name, IRe
     ITypeInfo *pTypeInfo;
     HRESULT hr = OLE_E_LAST;
     BSTR bstr;
+    int ai = mrb_gc_arena_save(mrb);
 
     count = pTypeLib->lpVtbl->GetTypeInfoCount(pTypeLib);
     for (i = 0; i < count; i++) {
@@ -46,10 +47,12 @@ recordinfo_from_itypelib(mrb_state *mrb, ITypeLib *pTypeLib, mrb_value name, IRe
             continue;
 
         if (mrb_str_cmp(mrb, WC2VSTR(mrb, bstr), name) == 0) {
+            mrb_gc_arena_restore(mrb, ai);
             hr = GetRecordInfoFromTypeInfo(pTypeInfo, ppri);
             OLE_RELEASE(pTypeInfo);
             return hr;
         }
+        mrb_gc_arena_restore(mrb, ai);
         OLE_RELEASE(pTypeInfo);
     }
     hr = OLE_E_LAST;
@@ -137,6 +140,7 @@ olerecord_set_ivar(mrb_state *mrb, mrb_value obj, IRecordInfo *pri, void *prec)
     VARIANT var;
     void *pdata = NULL;
     struct olerecorddata *pvar;
+    int ai;
 
     Data_Get_Struct(mrb, obj, &olerecord_datatype, pvar);
     OLE_ADDREF(pri);
@@ -157,9 +161,9 @@ olerecord_set_ivar(mrb_state *mrb, mrb_value obj, IRecordInfo *pri, void *prec)
         return;
     }
 
-    /* TODO: should use mrb_gc_arena_save()? */
     fields = mrb_hash_new(mrb);
     mrb_iv_set(mrb, obj, mrb_intern_lit(mrb, "fields"), fields);
+    ai = mrb_gc_arena_save(mrb);
     for (i = 0; i < count; i++) {
         pdata = NULL;
         VariantInit(&var);
@@ -171,6 +175,7 @@ olerecord_set_ivar(mrb_state *mrb, mrb_value obj, IRecordInfo *pri, void *prec)
             }
         }
         mrb_hash_set(mrb, fields, WC2VSTR(mrb, bstrs[i]), val);
+        mrb_gc_arena_restore(mrb, ai);
     }
 }
 

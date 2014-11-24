@@ -1458,7 +1458,9 @@ ary_new_dim(mrb_state *mrb, mrb_value myary, LONG *pid, LONG *plb, LONG dim) {
     for(i = 0; i < dim-1; i++) {
         obj = mrb_ary_entry(pobj, ids[i]);
         if (mrb_nil_p(obj)) {
+            int ai = mrb_gc_arena_save(mrb);
             mrb_ary_set(mrb, pobj, ids[i], mrb_ary_new(mrb));
+            mrb_gc_arena_restore(mrb, ai);
         }
         obj = mrb_ary_entry(pobj, ids[i]);
         pobj = obj;
@@ -1856,11 +1858,13 @@ ole_const_load(mrb_state *mrb, ITypeLib *pTypeLib, mrb_value klass, mrb_value se
                !(pVarDesc->wVarFlags & (VARFLAG_FHIDDEN |
                                         VARFLAG_FRESTRICTED |
                                         VARFLAG_FNONBROWSABLE))) {
+                int ai;
                 hr = pTypeInfo->lpVtbl->GetNames(pTypeInfo, pVarDesc->memid, &bstr,
                                                  1, &len);
                 if(FAILED(hr) || len == 0 || !bstr)
                     continue;
                 pName = ole_wc2mb(mrb, bstr);
+                ai = mrb_gc_arena_save(mrb);
                 val = ole_variant2val(mrb, V_UNION1(pVarDesc, lpvarValue));
                 *pName = toupper((int)*pName);
                 if (isupper((int)(unsigned char)*pName)) {
@@ -1869,6 +1873,7 @@ ole_const_load(mrb_state *mrb, ITypeLib *pTypeLib, mrb_value klass, mrb_value se
                 else {
                     mrb_hash_set(mrb, constant, mrb_str_new_cstr(mrb, pName), val);
                 }
+                mrb_gc_arena_restore(mrb, ai);
                 SysFreeString(bstr);
                 if(pName) {
                     free(pName);
@@ -2631,7 +2636,9 @@ set_argv(mrb_state *mrb, VARIANTARG* realargs, unsigned int beg, unsigned int en
     mrb_check_type(mrb, argv, MRB_TT_ARRAY);
     mrb_ary_clear(mrb, argv);
     while (end-- > beg) {
+        int ai = mrb_gc_arena_save(mrb);
         mrb_ary_push(mrb, argv, ole_variant2val(mrb, &realargs[end]));
+        mrb_gc_arena_restore(mrb, ai);
         if (V_VT(&realargs[end]) != VT_RECORD) {
             VariantClear(&realargs[end]);
         }
@@ -3314,14 +3321,17 @@ ole_each_sub(mrb_state *mrb, mrb_value self)
     mrb_value pEnumV, block;
     VARIANT variant;
     mrb_value obj = mrb_nil_value();
+    int ai;
     mrb_get_args(mrb, "oo", &pEnumV, &block);
     pEnum = (IEnumVARIANT *)mrb_cptr(pEnumV);
     VariantInit(&variant);
+    ai = mrb_gc_arena_save(mrb);
     while(pEnum->lpVtbl->Next(pEnum, 1, &variant, NULL) == S_OK) {
         obj = ole_variant2val(mrb, &variant);
         VariantClear(&variant);
         VariantInit(&variant);
         mrb_yield(mrb, block, obj);
+        mrb_gc_arena_restore(mrb, ai);
     }
     return mrb_nil_value();
 }

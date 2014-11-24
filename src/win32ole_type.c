@@ -141,11 +141,14 @@ foletype_s_typelibs(mrb_state *mrb, mrb_value self)
     mrb_value typelibs = mrb_funcall(mrb, mrb_obj_value(C_WIN32OLE_TYPELIB), "typelibs", 0);
     int len = RARRAY_LEN(typelibs);
     int i;
+    int ai;
     mrb_value typelibnames = mrb_ary_new_capa(mrb, len);
+    ai = mrb_gc_arena_save(mrb);
     for (i = 0; i < len; i++) {
         mrb_value val = RARRAY_PTR(typelibs)[i];
         mrb_value name = mrb_funcall(mrb, val, "name", 0);
         mrb_ary_push(mrb, typelibnames, name);
+        mrb_gc_arena_restore(mrb, ai);
     }
     return typelibnames;
 }
@@ -165,12 +168,15 @@ foletype_s_progids(mrb_state *mrb, mrb_value self)
     mrb_value clsid;
     mrb_value v = mrb_str_new_lit(mrb, "");
     mrb_value progids = mrb_ary_new(mrb);
+    int ai;
 
     err = reg_open_key(HKEY_CLASSES_ROOT, "CLSID", &hclsids);
     if(err != ERROR_SUCCESS) {
         return progids;
     }
+    ai = mrb_gc_arena_save(mrb);
     for(i = 0; ; i++) {
+        mrb_gc_arena_restore(mrb, ai);
         clsid = reg_enum_key(mrb, hclsids, i);
         if (mrb_nil_p(clsid))
             break;
@@ -183,6 +189,7 @@ foletype_s_progids(mrb_state *mrb, mrb_value self)
             mrb_ary_push(mrb, progids, v);
         RegCloseKey(hclsid);
     }
+    mrb_gc_arena_restore(mrb, ai);
     RegCloseKey(hclsids);
     return progids;
 }
@@ -234,10 +241,11 @@ oleclass_from_typelib(mrb_state *mrb, mrb_value self, ITypeLib *pTypeLib, mrb_va
     BSTR bstr;
     mrb_value typelib;
     ITypeInfo *pTypeInfo;
-
+    int ai;
     mrb_value found = mrb_false_value();
 
     count = pTypeLib->lpVtbl->GetTypeInfoCount(pTypeLib);
+    ai = mrb_gc_arena_save(mrb);
     for (i = 0; i < count && !mrb_bool(found); i++) {
         hr = pTypeLib->lpVtbl->GetTypeInfo(pTypeLib, i, &pTypeInfo);
         if (FAILED(hr))
@@ -251,6 +259,7 @@ oleclass_from_typelib(mrb_state *mrb, mrb_value self, ITypeLib *pTypeLib, mrb_va
             oletype_set_member(mrb, self, pTypeInfo, typelib);
             found = mrb_true_value();
         }
+        mrb_gc_arena_restore(mrb, ai);
         OLE_RELEASE(pTypeInfo);
     }
     return found;
@@ -700,11 +709,13 @@ ole_variables(mrb_state *mrb, ITypeInfo *pTypeInfo)
     VARDESC *pVarDesc;
     mrb_value var;
     mrb_value variables = mrb_ary_new(mrb);
+    int ai;
     hr = OLE_GET_TYPEATTR(pTypeInfo, &pTypeAttr);
     if (FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "failed to GetTypeAttr");
     }
 
+    ai = mrb_gc_arena_save(mrb);
     for(i = 0; i < pTypeAttr->cVars; i++) {
         hr = pTypeInfo->lpVtbl->GetVarDesc(pTypeInfo, i, &pVarDesc);
         if(FAILED(hr))
@@ -717,6 +728,7 @@ ole_variables(mrb_state *mrb, ITypeInfo *pTypeInfo)
 
         var = create_win32ole_variable(mrb, pTypeInfo, i, WC2VSTR(mrb, bstr));
         mrb_ary_push(mrb, variables, var);
+        mrb_gc_arena_restore(mrb, ai);
 
         pTypeInfo->lpVtbl->ReleaseVarDesc(pTypeInfo, pVarDesc);
         pVarDesc = NULL;
@@ -797,12 +809,14 @@ ole_type_impl_ole_types(mrb_state *mrb, ITypeInfo *pTypeInfo, int implflags)
     mrb_value type;
     TYPEATTR *pTypeAttr;
     int flags;
+    int ai;
 
     mrb_value types = mrb_ary_new(mrb);
     hr = OLE_GET_TYPEATTR(pTypeInfo, &pTypeAttr);
     if (FAILED(hr)) {
         return types;
     }
+    ai = mrb_gc_arena_save(mrb);
     for (i = 0; i < pTypeAttr->cImplTypes; i++) {
         hr = pTypeInfo->lpVtbl->GetImplTypeFlags(pTypeInfo, i, &flags);
         if (FAILED(hr))
@@ -820,6 +834,7 @@ ole_type_impl_ole_types(mrb_state *mrb, ITypeInfo *pTypeInfo, int implflags)
             if (!mrb_nil_p(type)) {
                 mrb_ary_push(mrb, types, type);
             }
+            mrb_gc_arena_restore(mrb, ai);
         }
 
         OLE_RELEASE(pRefTypeInfo);

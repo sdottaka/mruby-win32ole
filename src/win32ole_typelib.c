@@ -60,7 +60,7 @@ oletypelib_path(mrb_state *mrb, mrb_value guid, mrb_value version)
     HKEY hlang;
     mrb_value lang;
     mrb_value path = mrb_nil_value();
-
+    int ai;
     mrb_value key = mrb_str_new_lit(mrb, "TypeLib\\");
     mrb_str_concat(mrb, key, guid);
     mrb_str_cat_lit(mrb, key, "\\");
@@ -70,11 +70,15 @@ oletypelib_path(mrb_state *mrb, mrb_value guid, mrb_value version)
     if (err != ERROR_SUCCESS) {
         return mrb_nil_value();
     }
+    ai = mrb_gc_arena_save(mrb);
     for(k = 0; mrb_nil_p(path); k++) {
         lang = reg_enum_key(mrb, hkey, k);
-        if (mrb_nil_p(lang))
+        if (mrb_nil_p(lang)) {
+            mrb_gc_arena_restore(mrb, ai);
             break;
+        }
         err = reg_open_vkey(mrb, hkey, lang, &hlang);
+        mrb_gc_arena_restore(mrb, ai);
         if (err == ERROR_SUCCESS) {
             path = reg_get_typelib_file_path(mrb, hlang);
             RegCloseKey(hlang);
@@ -153,22 +157,30 @@ foletypelib_s_typelibs(mrb_state *mrb, mrb_value self)
     mrb_value typelib = mrb_nil_value();
     HRESULT hr;
     ITypeLib *pTypeLib;
+    int ai;
 
     err = reg_open_key(HKEY_CLASSES_ROOT, "TypeLib", &htypelib);
     if(err != ERROR_SUCCESS) {
         return typelibs;
     }
+    ai = mrb_gc_arena_save(mrb);
     for(i = 0; ; i++) {
         guid = reg_enum_key(mrb, htypelib, i);
-        if (mrb_nil_p(guid))
+        if (mrb_nil_p(guid)) {
+            mrb_gc_arena_restore(mrb, ai);
             break;
+        }
         err = reg_open_vkey(mrb, htypelib, guid, &hguid);
-        if (err != ERROR_SUCCESS)
+        if (err != ERROR_SUCCESS) {
+            mrb_gc_arena_restore(mrb, ai);
             continue;
+        }
         for(j = 0; ; j++) {
             version = reg_enum_key(mrb, hguid, j);
-            if (mrb_nil_p(version))
+            if (mrb_nil_p(version)) {
+                mrb_gc_arena_restore(mrb, ai);
                 break;
+            }
             if ( !mrb_nil_p((name = reg_get_val2(mrb, hguid, mrb_string_value_ptr(mrb, version)))) ) {
                 hr = oletypelib_from_guid(mrb, guid, version, &pTypeLib);
                 if (SUCCEEDED(hr)) {
@@ -176,7 +188,9 @@ foletypelib_s_typelibs(mrb_state *mrb, mrb_value self)
                     mrb_ary_push(mrb, typelibs, typelib);
                 }
             }
+            mrb_gc_arena_restore(mrb, ai);
         }
+        mrb_gc_arena_restore(mrb, ai);
         RegCloseKey(hguid);
     }
     RegCloseKey(htypelib);
@@ -239,27 +253,38 @@ oletypelib_search_registry(mrb_state *mrb, mrb_value self, mrb_value typelib)
     mrb_value ver;
     HRESULT hr;
     ITypeLib *pTypeLib;
+    int ai;
 
     err = reg_open_key(HKEY_CLASSES_ROOT, "TypeLib", &htypelib);
     if(err != ERROR_SUCCESS) {
         return mrb_false_value();
     }
+    ai = mrb_gc_arena_save(mrb);
     for(i = 0; !mrb_bool(found); i++) {
         guid = reg_enum_key(mrb, htypelib, i);
-        if (mrb_nil_p(guid))
+        if (mrb_nil_p(guid)) {
+            mrb_gc_arena_restore(mrb, ai);
             break;
+        }
         err = reg_open_vkey(mrb, htypelib, guid, &hguid);
-        if (err != ERROR_SUCCESS)
+        if (err != ERROR_SUCCESS) {
+            mrb_gc_arena_restore(mrb, ai);
             continue;
+        }
         for(j = 0; !mrb_bool(found); j++) {
             ver = reg_enum_key(mrb, hguid, j);
-            if (mrb_nil_p(ver))
+            if (mrb_nil_p(ver)) {
+                mrb_gc_arena_restore(mrb, ai);
                 break;
+            }
             err = reg_open_vkey(mrb, hguid, ver, &hversion);
-            if (err != ERROR_SUCCESS)
+            if (err != ERROR_SUCCESS) {
+                mrb_gc_arena_restore(mrb, ai);
                 continue;
+            }
             tlib = reg_get_val(mrb, hversion, NULL);
             if (mrb_nil_p(tlib)) {
+                mrb_gc_arena_restore(mrb, ai);
                 RegCloseKey(hversion);
                 continue;
             }
@@ -270,8 +295,10 @@ oletypelib_search_registry(mrb_state *mrb, mrb_value self, mrb_value typelib)
                     found = mrb_true_value();
                 }
             }
+            mrb_gc_arena_restore(mrb, ai);
             RegCloseKey(hversion);
         }
+        mrb_gc_arena_restore(mrb, ai);
         RegCloseKey(hguid);
     }
     RegCloseKey(htypelib);
@@ -304,16 +331,20 @@ oletypelib_search_registry2(mrb_state *mrb, mrb_value self, mrb_value typelibnam
     mrb_value typelib = mrb_nil_value();
     HRESULT hr;
     ITypeLib *pTypeLib;
-
+    int ai;
     mrb_value guid = typelibname;
+
+    ai = mrb_gc_arena_save(mrb);
     version_str = make_version_str(mrb, major_ver, minor_ver);
 
     err = reg_open_key(HKEY_CLASSES_ROOT, "TypeLib", &htypelib);
     if(err != ERROR_SUCCESS) {
+        mrb_gc_arena_restore(mrb, ai);
         return mrb_false_value();
     }
     err = reg_open_vkey(mrb, htypelib, guid, &hguid);
     if (err != ERROR_SUCCESS) {
+        mrb_gc_arena_restore(mrb, ai);
         RegCloseKey(htypelib);
         return mrb_false_value();
     }
@@ -358,6 +389,7 @@ oletypelib_search_registry2(mrb_state *mrb, mrb_value self, mrb_value typelibnam
             oletypelib_set_member(mrb, self, pTypeLib);
         }
     }
+    mrb_gc_arena_restore(mrb, ai);
     return found;
 }
 
@@ -682,6 +714,7 @@ ole_types_from_typelib(mrb_state *mrb, ITypeLib *pTypeLib, mrb_value classes)
     BSTR bstr;
     ITypeInfo *pTypeInfo;
     mrb_value type;
+    int ai;
 
     count = pTypeLib->lpVtbl->GetTypeInfoCount(pTypeLib);
     for (i = 0; i < count; i++) {
@@ -694,10 +727,12 @@ ole_types_from_typelib(mrb_state *mrb, ITypeLib *pTypeLib, mrb_value classes)
         if (FAILED(hr))
             continue;
 
+        ai = mrb_gc_arena_save(mrb);
         type = create_win32ole_type(mrb, pTypeInfo, WC2VSTR(mrb, bstr));
 
         mrb_ary_push(mrb, classes, type);
         OLE_RELEASE(pTypeInfo);
+        mrb_gc_arena_restore(mrb, ai);
     }
     return classes;
 }
@@ -715,12 +750,15 @@ typelib_file_from_typelib(mrb_state *mrb, mrb_value ole)
     mrb_value clsid;
     mrb_value ver;
     mrb_value lang;
+    int ai;
 
     err = reg_open_key(HKEY_CLASSES_ROOT, "TypeLib", &htypelib);
     if(err != ERROR_SUCCESS) {
         return mrb_nil_value();
     }
+    ai = mrb_gc_arena_save(mrb);
     for(i = 0; !found; i++) {
+        mrb_gc_arena_restore(mrb, ai);
         clsid = reg_enum_key(mrb, htypelib, i);
         if (mrb_nil_p(clsid))
             break;
@@ -729,6 +767,7 @@ typelib_file_from_typelib(mrb_state *mrb, mrb_value ole)
             continue;
         fver = 0;
         for(j = 0; !found; j++) {
+            mrb_gc_arena_restore(mrb, ai);
             ver = reg_enum_key(mrb, hclsid, j);
             if (mrb_nil_p(ver))
                 break;
@@ -741,6 +780,7 @@ typelib_file_from_typelib(mrb_state *mrb, mrb_value ole)
                 continue;
             if (mrb_str_cmp(mrb, typelib, ole) == 0) {
                 for(k = 0; !found; k++) {
+                    mrb_gc_arena_restore(mrb, ai);
                     lang = reg_enum_key(mrb, hversion, k);
                     if (mrb_nil_p(lang))
                         break;
@@ -756,6 +796,7 @@ typelib_file_from_typelib(mrb_state *mrb, mrb_value ole)
         }
         RegCloseKey(hclsid);
     }
+    mrb_gc_arena_restore(mrb, ai);
     RegCloseKey(htypelib);
     return  file;
 }

@@ -74,10 +74,12 @@ ole_method_sub(mrb_state *mrb, mrb_value self, ITypeInfo *pOwnerTypeInfo, ITypeI
     WORD i;
     mrb_value fname;
     mrb_value method = mrb_nil_value();
+    int ai;
     hr = OLE_GET_TYPEATTR(pTypeInfo, &pTypeAttr);
     if (FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "failed to GetTypeAttr");
     }
+    ai = mrb_gc_arena_save(mrb);
     for(i = 0; i < pTypeAttr->cFuncs && mrb_nil_p(method); i++) {
         hr = pTypeInfo->lpVtbl->GetFuncDesc(pTypeInfo, i, &pFuncDesc);
         if (FAILED(hr))
@@ -94,6 +96,7 @@ ole_method_sub(mrb_state *mrb, mrb_value self, ITypeInfo *pOwnerTypeInfo, ITypeI
             olemethod_set_member(mrb, self, pTypeInfo, pOwnerTypeInfo, i, fname);
             method = self;
         }
+        mrb_gc_arena_restore(mrb, ai);
         pTypeInfo->lpVtbl->ReleaseFuncDesc(pTypeInfo, pFuncDesc);
         pFuncDesc=NULL;
     }
@@ -186,10 +189,12 @@ ole_methods_sub(mrb_state *mrb, ITypeInfo *pOwnerTypeInfo, ITypeInfo *pTypeInfo,
             continue;
         }
         if(pFuncDesc->invkind & mask) {
+            int ai = mrb_gc_arena_save(mrb);
             method = folemethod_s_allocate(mrb, C_WIN32OLE_METHOD);
             olemethod_set_member(mrb, method, pTypeInfo, pOwnerTypeInfo,
                                  i, WC2VSTR(mrb, bstr));
             mrb_ary_push(mrb, methods, method);
+            mrb_gc_arena_restore(mrb, ai);
         }
         pTypeInfo->lpVtbl->ReleaseFuncDesc(pTypeInfo, pFuncDesc);
         pFuncDesc=NULL;
@@ -533,6 +538,7 @@ ole_method_event(mrb_state *mrb, ITypeInfo *pTypeInfo, UINT method_index, mrb_va
     BSTR bstr;
     mrb_value name;
     mrb_value event = mrb_false_value();
+    int ai;
 
     hr = OLE_GET_TYPEATTR(pTypeInfo, &pTypeAttr);
     if (FAILED(hr))
@@ -541,6 +547,7 @@ ole_method_event(mrb_state *mrb, ITypeInfo *pTypeInfo, UINT method_index, mrb_va
         pTypeInfo->lpVtbl->ReleaseTypeAttr(pTypeInfo, pTypeAttr);
         return event;
     }
+    ai = mrb_gc_arena_save(mrb);
     for (i = 0; i < pTypeAttr->cImplTypes; i++) {
         hr = pTypeInfo->lpVtbl->GetImplTypeFlags(pTypeInfo, i, &flags);
         if (FAILED(hr))
@@ -576,8 +583,10 @@ ole_method_event(mrb_state *mrb, ITypeInfo *pTypeInfo, UINT method_index, mrb_va
             OLE_RELEASE(pRefTypeInfo);
             if (mrb_str_cmp(mrb, method_name, name) == 0) {
                 event = mrb_true_value();
+                mrb_gc_arena_restore(mrb, ai);
                 break;
             }
+            mrb_gc_arena_restore(mrb, ai);
         }
     }
     OLE_RELEASE_TYPEATTR(pTypeInfo, pTypeAttr);
@@ -893,9 +902,11 @@ ole_method_params(mrb_state *mrb, ITypeInfo *pTypeInfo, UINT method_index)
     }
     SysFreeString(bstrs[0]);
     if (pFuncDesc->cParams > 0) {
+        int ai = mrb_gc_arena_save(mrb);
         for(i = 1; i < len; i++) {
             param = create_win32ole_param(mrb, pTypeInfo, method_index, i-1, WC2VSTR(mrb, bstrs[i]));
             mrb_ary_push(mrb, params, param);
+            mrb_gc_arena_restore(mrb, ai);
          }
      }
      pTypeInfo->lpVtbl->ReleaseFuncDesc(pTypeInfo, pFuncDesc);
