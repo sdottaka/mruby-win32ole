@@ -1,4 +1,3 @@
-GC.disable
 if Object.const_defined?(:MTest) && Kernel.respond_to?(:require) && Module.const_defined?(:Regexp)
   STDERR = Kernel unless Module.const_defined?(:STDERR)
   Test = MTest
