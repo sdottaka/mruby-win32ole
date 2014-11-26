@@ -111,6 +111,14 @@
 #define V_UINTREF(X) V_UNION(X, puintVal)
 #endif
 
+#ifndef V_RECORD
+#define V_RECORD(X)     ((X)->pvRecord)
+#endif
+
+#ifndef V_RECORDINFO
+#define V_RECORDINFO(X) ((X)->pRecInfo)
+#endif
+
 #if defined(HAVE_LONG_LONG) || defined(__int64) || defined(_MSC_VER)
 #define I8_2_NUM LL2NUM
 #define UI8_2_NUM ULL2NUM
