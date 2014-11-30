@@ -865,7 +865,9 @@ ole_initialize(mrb_state *mrb)
 	rb_add_event_hook(ole_uninitialize_hook, RUBY_EVENT_THREAD_END, mrb_nil_value());
 */
 /* */
+#ifndef __CYGWIN__
       _onexit(ole_uninitialize);
+#endif
 
 	g_uninitialize_hooked = TRUE;
     }

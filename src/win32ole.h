@@ -12,7 +12,9 @@
 #include "mruby/numeric.h"
 #include <malloc.h>
 
+#ifndef __CYGWIN__
 #define strcasecmp   _stricmp
+#endif
 #define FIX2INT(val) mrb_fixnum((val))
 #define INT2FIX(val) mrb_fixnum_value((val))
 #define INT2NUM(val) (FIXABLE((val)) ? mrb_fixnum_value((mrb_int)(val)) : mrb_float_value(mrb, (mrb_float)(val)))

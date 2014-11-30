@@ -4,6 +4,7 @@ MRuby::Gem::Specification.new('mruby-win32ole') do |spec|
   spec.add_dependency 'mruby-time'
   
   if ENV['OS'] == 'Windows_NT'
+    spec.linker.library_paths << '/lib/w32api' unless cc.command =~ /^cl(\.exe)?$/
     spec.linker.libraries << ['ole32', 'oleaut32', 'advapi32', 'user32', 'uuid']
   else
     raise "mruby-win32ole does not support on non-Windows OSs."
