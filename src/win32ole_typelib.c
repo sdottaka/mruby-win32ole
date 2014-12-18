@@ -181,7 +181,7 @@ foletypelib_s_typelibs(mrb_state *mrb, mrb_value self)
                 mrb_gc_arena_restore(mrb, ai);
                 break;
             }
-            if ( !mrb_nil_p((name = reg_get_val2(mrb, hguid, mrb_string_value_ptr(mrb, version)))) ) {
+            if ( !mrb_nil_p((name = reg_get_val2(mrb, hguid, ole_obj_to_cstr(mrb, version)))) ) {
                 hr = oletypelib_from_guid(mrb, guid, version, &pTypeLib);
                 if (SUCCEEDED(hr)) {
                     typelib = create_win32ole_typelib(mrb, pTypeLib);
@@ -372,8 +372,8 @@ oletypelib_search_registry2(mrb_state *mrb, mrb_value self, mrb_value typelibnam
                 RegCloseKey(hversion);
                 continue;
             }
-            if (fver < atof(mrb_string_value_ptr(mrb, ver))) {
-                fver = atof(mrb_string_value_ptr(mrb, ver));
+            if (fver < atof(ole_obj_to_cstr(mrb, ver))) {
+                fver = atof(ole_obj_to_cstr(mrb, ver));
                 version = ver;
                 typelib = tlib;
             }
@@ -772,9 +772,9 @@ typelib_file_from_typelib(mrb_state *mrb, mrb_value ole)
             if (mrb_nil_p(ver))
                 break;
             err = reg_open_vkey(mrb, hclsid, ver, &hversion);
-			if (err != ERROR_SUCCESS || fver > atof(mrb_string_value_ptr(mrb, ver)))
+			if (err != ERROR_SUCCESS || fver > atof(ole_obj_to_cstr(mrb, ver)))
                 continue;
-            fver = atof(mrb_string_value_ptr(mrb, ver));
+            fver = atof(ole_obj_to_cstr(mrb, ver));
             typelib = reg_get_val(mrb, hversion, NULL);
             if (mrb_nil_p(typelib))
                 continue;
@@ -813,7 +813,7 @@ typelib_file_from_clsid(mrb_state *mrb, mrb_value ole)
     if (err != ERROR_SUCCESS) {
         return mrb_nil_value();
     }
-    err = reg_open_key(hroot, mrb_string_value_ptr(mrb, ole), &hclsid);
+    err = reg_open_key(hroot, ole_obj_to_cstr(mrb, ole), &hclsid);
     if (err != ERROR_SUCCESS) {
         RegCloseKey(hroot);
         return mrb_nil_value();
@@ -822,7 +822,7 @@ typelib_file_from_clsid(mrb_state *mrb, mrb_value ole)
     RegCloseKey(hroot);
     RegCloseKey(hclsid);
     if (!mrb_nil_p(typelib)) {
-        ExpandEnvironmentStringsA(mrb_string_value_ptr(mrb, typelib), path, sizeof(path));
+        ExpandEnvironmentStringsA(ole_obj_to_cstr(mrb, typelib), path, sizeof(path));
         path[MAX_PATH] = '\0';
         typelib = mrb_str_new_cstr(mrb, path);
     }

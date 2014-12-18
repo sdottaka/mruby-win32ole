@@ -187,6 +187,7 @@ mrb_value ole_variant2val(mrb_state *mrb, VARIANT *pvar);
 HRESULT ole_val_ary2variant_ary(mrb_state *mrb, mrb_value val, VARIANT *var, VARTYPE vt);
 VOID *val2variant_ptr(mrb_state *mrb, mrb_value val, VARIANT *var, VARTYPE vt);
 HRESULT typelib_from_val(mrb_state *mrb, mrb_value obj, ITypeLib **pTypeLib);
+const char *ole_obj_to_cstr(mrb_state *mrb, mrb_value obj);
 
 #include "win32ole_variant_m.h"
 #include "win32ole_typelib.h"

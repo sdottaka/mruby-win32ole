@@ -476,7 +476,7 @@ rescue_callback(mrb_state *mrb, mrb_value arg)
     mrb_value msg = mrb_funcall(mrb, e, "message", 0);
     bt = mrb_ary_entry(bt, 0);
     error = mrb_format(mrb, "%S: %S (%S)\n", bt, msg, mrb_obj_classname(mrb, e));
-    rb_write_error(mrb_string_value_ptr(mrb, error));
+    rb_write_error(ole_obj_to_cstr(mrb, error));
     rb_backtrace();
     ruby_finalize();
     exit(-1);
@@ -925,7 +925,7 @@ ev_advise(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self)
     }
 
     if(!mrb_nil_p(itf)) {
-        pitf = mrb_string_value_ptr(mrb, itf);
+        pitf = ole_obj_to_cstr(mrb, itf);
         /*
         if (rb_safe_level() > 0 && OBJ_TAINTED(itf)) {
             rb_raise(rb_eSecurityError, "insecure event creation - `%s'",

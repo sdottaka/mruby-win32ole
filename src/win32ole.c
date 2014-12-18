@@ -455,6 +455,16 @@ ole_initialized(void)
     return g_ole_initialized;
 }
 
+const char *
+ole_obj_to_cstr(mrb_state *mrb, mrb_value obj)
+{
+	mrb_value str = mrb_str_to_str(mrb, obj);
+	const char *p = RSTRING_PTR(str);
+	if (p[RSTRING_LEN(str)] == '\0')
+		return p;
+	return mrb_string_value_cstr(mrb, &str);
+}
+
 static IDispatch*
 val2dispatch(mrb_state *mrb, mrb_value val)
 {
@@ -1763,7 +1773,7 @@ reg_open_key(HKEY hkey, const char *name, HKEY *phkey)
 LONG
 reg_open_vkey(mrb_state *mrb, HKEY hkey, mrb_value key, HKEY *phkey)
 {
-    return reg_open_key(hkey, mrb_string_value_ptr(mrb, key), phkey);
+    return reg_open_key(hkey, ole_obj_to_cstr(mrb, key), phkey);
 }
 
 mrb_value
@@ -1902,13 +1912,13 @@ clsid_from_remote(mrb_state *mrb, mrb_value host, mrb_value com, CLSID *pclsid)
     DWORD len;
     DWORD dwtype;
     HRESULT hr = S_OK;
-    err = RegConnectRegistryA(mrb_string_value_ptr(mrb, host), HKEY_LOCAL_MACHINE, &hlm);
+    err = RegConnectRegistryA(ole_obj_to_cstr(mrb, host), HKEY_LOCAL_MACHINE, &hlm);
     if (err != ERROR_SUCCESS)
         return HRESULT_FROM_WIN32(err);
     subkey = mrb_str_new_lit(mrb, "SOFTWARE\\Classes\\");
     mrb_str_concat(mrb, subkey, com);
     mrb_str_cat_lit(mrb, subkey, "\\CLSID");
-    err = RegOpenKeyExA(hlm, mrb_string_value_ptr(mrb, subkey), 0, KEY_READ, &hpid);
+    err = RegOpenKeyExA(hlm, ole_obj_to_cstr(mrb, subkey), 0, KEY_READ, &hpid);
     if (err != ERROR_SUCCESS)
         hr = HRESULT_FROM_WIN32(err);
     else {
@@ -1959,7 +1969,7 @@ ole_create_dcom(mrb_state *mrb, mrb_value self, mrb_value ole, mrb_value host, m
     if (FAILED(hr))
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "unknown OLE server: `%s'",
-                  mrb_string_value_ptr(mrb, ole));
+                  ole_obj_to_cstr(mrb, ole));
     memset(&serverinfo, 0, sizeof(COSERVERINFO));
     serverinfo.pwszName = ole_vstr2wc(mrb, host);
     memset(&multi_qi, 0, sizeof(MULTI_QI));
@@ -1969,8 +1979,8 @@ ole_create_dcom(mrb_state *mrb, mrb_value self, mrb_value ole, mrb_value host, m
     if (FAILED(hr))
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "failed to create DCOM server `%s' in `%s'",
-                  mrb_string_value_ptr(mrb, ole),
-                  mrb_string_value_ptr(mrb, host));
+                  ole_obj_to_cstr(mrb, ole),
+                  ole_obj_to_cstr(mrb, host));
 
     ole_set_member(mrb, self, (IDispatch*)multi_qi.pItf);
     return self;
@@ -2002,7 +2012,7 @@ ole_bind_obj(mrb_state *mrb, mrb_value moniker, mrb_int argc, mrb_value *argv, m
         OLE_RELEASE(pBindCtx);
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "failed to parse display name of moniker `%s'",
-                  mrb_string_value_ptr(mrb, moniker));
+                  ole_obj_to_cstr(mrb, moniker));
     }
     hr = pMoniker->lpVtbl->BindToObject(pMoniker, pBindCtx, NULL,
                                         &IID_IDispatch, &p);
@@ -2013,7 +2023,7 @@ ole_bind_obj(mrb_state *mrb, mrb_value moniker, mrb_int argc, mrb_value *argv, m
     if(FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "failed to bind moniker `%s'",
-                  mrb_string_value_ptr(mrb, moniker));
+                  ole_obj_to_cstr(mrb, moniker));
     }
     return create_win32ole_object(mrb, mrb_class_ptr(self), pDispatch, argc, argv);
 }
@@ -2048,7 +2058,7 @@ fole_s_connect(mrb_state *mrb, mrb_value self)
 /*
     if (rb_safe_level() > 0 && OBJ_TAINTED(svr_name)) {
         mrb_raise(mrb, rb_eSecurityError, "insecure connection - `%s'",
-		mrb_string_value_ptr(mrb, svr_name));
+		ole_obj_to_cstr(mrb, svr_name));
     }
 */
 
@@ -2066,7 +2076,7 @@ fole_s_connect(mrb_state *mrb, mrb_value self)
     hr = GetActiveObject(&clsid, 0, &pUnknown);
     if (FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
-                  "OLE server `%s' not running", mrb_string_value_ptr(mrb, svr_name));
+                  "OLE server `%s' not running", ole_obj_to_cstr(mrb, svr_name));
     }
     hr = pUnknown->lpVtbl->QueryInterface(pUnknown, &IID_IDispatch, &p);
     pDispatch = p;
@@ -2074,7 +2084,7 @@ fole_s_connect(mrb_state *mrb, mrb_value self)
         OLE_RELEASE(pUnknown);
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "failed to create WIN32OLE server `%s'",
-                  mrb_string_value_ptr(mrb, svr_name));
+                  ole_obj_to_cstr(mrb, svr_name));
     }
 
     OLE_RELEASE(pUnknown);
@@ -2243,10 +2253,10 @@ ole_show_help(mrb_state *mrb, mrb_value helpfile, mrb_value helpcontext)
     pfnHtmlHelp = (FNHTMLHELP*)GetProcAddress(ghhctrl, "HtmlHelpA");
     if (!pfnHtmlHelp)
         return hwnd;
-    hwnd = pfnHtmlHelp(GetDesktopWindow(), mrb_string_value_ptr(mrb, helpfile),
+    hwnd = pfnHtmlHelp(GetDesktopWindow(), ole_obj_to_cstr(mrb, helpfile),
                     0x0f, NUM2INT(helpcontext));
     if (hwnd == 0)
-        hwnd = pfnHtmlHelp(GetDesktopWindow(), mrb_string_value_ptr(mrb, helpfile),
+        hwnd = pfnHtmlHelp(GetDesktopWindow(), ole_obj_to_cstr(mrb, helpfile),
                  0,  NUM2INT(helpcontext));
     return hwnd;
 }
@@ -2274,7 +2284,7 @@ fole_s_show_help(mrb_state *mrb, mrb_value self)
     if (mrb_obj_is_kind_of(mrb, target, C_WIN32OLE_TYPE) ||
         mrb_obj_is_kind_of(mrb, target, C_WIN32OLE_METHOD)) {
         helpfile = mrb_funcall(mrb, target, "helpfile", 0);
-        if(strlen(mrb_string_value_ptr(mrb, helpfile)) == 0) {
+        if(strlen(ole_obj_to_cstr(mrb, helpfile)) == 0) {
             name = mrb_iv_get(mrb, target, mrb_intern_lit(mrb, "name"));
             mrb_raisef(mrb, E_RUNTIME_ERROR, "no helpfile of `%S'",
                       name);
@@ -2555,7 +2565,7 @@ fole_initialize(mrb_state *mrb, mrb_value self)
  FIXME:
     if (rb_safe_level() > 0 && OBJ_TAINTED(svr_name)) {
         mrb_raise(mrb, rb_eSecurityError, "insecure object creation - `%s'",
-                 mrb_string_value_ptr(mrb, svr_name));
+                 ole_obj_to_cstr(mrb, svr_name));
     }
 */
     if (!mrb_nil_p(host)) {
@@ -2563,7 +2573,7 @@ fole_initialize(mrb_state *mrb, mrb_value self)
  FIXME:
         if (rb_safe_level() > 0 && OBJ_TAINTED(host)) {
             mrb_raise(mrb, rb_eSecurityError, "insecure object creation - `%s'",
-                     mrb_string_value_ptr(mrb, host));
+                     ole_obj_to_cstr(mrb, host));
         }
 */
         return ole_create_dcom(mrb, self, svr_name, host, others);
@@ -2579,7 +2589,7 @@ fole_initialize(mrb_state *mrb, mrb_value self)
     if(FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "unknown OLE server: `%s'",
-                  mrb_string_value_ptr(mrb, svr_name));
+                  ole_obj_to_cstr(mrb, svr_name));
     }
 
     /* get IDispatch interface */
@@ -2589,7 +2599,7 @@ fole_initialize(mrb_state *mrb, mrb_value self)
     if(FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "failed to create WIN32OLE object from `%s'",
-                  mrb_string_value_ptr(mrb, svr_name));
+                  ole_obj_to_cstr(mrb, svr_name));
     }
 
     ole_set_member(mrb, self, pDispatch);
@@ -2707,7 +2717,7 @@ ole_invoke(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self, USHORT
         if(FAILED(hr)) {
             ole_raise(mrb, hr, E_NOMETHOD_ERROR,
                     "unknown property or method: `%s'",
-                    mrb_string_value_ptr(mrb, cmd));
+                    ole_obj_to_cstr(mrb, cmd));
         }
     }
 
@@ -2751,7 +2761,7 @@ ole_invoke(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self, USHORT
             }
             ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                       "failed to get named argument info: `%s'",
-                      mrb_string_value_ptr(mrb, cmd));
+                      ole_obj_to_cstr(mrb, cmd));
         }
         op.dp.rgdispidNamedArgs = &(pDispID[1]);
     }
@@ -2886,8 +2896,8 @@ ole_invoke(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self, USHORT
     if (FAILED(hr)) {
         v = ole_excepinfo2msg(mrb, &excepinfo);
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "(in OLE method `%s': )%s",
-                  mrb_string_value_ptr(mrb, cmd),
-                  mrb_string_value_ptr(mrb, v));
+                  ole_obj_to_cstr(mrb, cmd),
+                  ole_obj_to_cstr(mrb, v));
     }
     obj = ole_variant2val(mrb, &result);
     VariantClear(&result);
@@ -3093,7 +3103,7 @@ ole_invoke2(mrb_state *mrb, mrb_value self, mrb_value dispid, mrb_value args, mr
         v = ole_excepinfo2msg(mrb, &excepinfo);
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "(in OLE method `<dispatch id:%d>': )%s",
                   NUM2INT(dispid),
-                  mrb_string_value_ptr(mrb, v));
+                  ole_obj_to_cstr(mrb, v));
     }
 
     /* clear dispatch parameter */
@@ -3277,7 +3287,7 @@ ole_propertyput(mrb_state *mrb, mrb_value self, mrb_value property, mrb_value va
     if(FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "unknown property or method: `%s'",
-                  mrb_string_value_ptr(mrb, property));
+                  ole_obj_to_cstr(mrb, property));
     }
     /* set property value */
     ole_val2variant(mrb, value, &propertyValue[0]);
@@ -3291,8 +3301,8 @@ ole_propertyput(mrb_state *mrb, mrb_value self, mrb_value property, mrb_value va
     if (FAILED(hr)) {
         v = ole_excepinfo2msg(mrb, &excepinfo);
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "(in setting property `%s': )%s",
-                  mrb_string_value_ptr(mrb, property),
-                  mrb_string_value_ptr(mrb, v));
+                  ole_obj_to_cstr(mrb, property),
+                  ole_obj_to_cstr(mrb, v));
     }
     return mrb_nil_value();
 }
@@ -3693,7 +3703,7 @@ fole_query_interface(mrb_state *mrb, mrb_value self)
     if(FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "invalid iid: `%s'",
-                  mrb_string_value_ptr(mrb, str_iid));
+                  ole_obj_to_cstr(mrb, str_iid));
     }
 
     OLEData_Get_Struct(mrb, self, pole);
@@ -3706,7 +3716,7 @@ fole_query_interface(mrb_state *mrb, mrb_value self)
     if(FAILED(hr)) {
         ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR,
                   "failed to get interface `%s'",
-                  mrb_string_value_ptr(mrb, str_iid));
+                  ole_obj_to_cstr(mrb, str_iid));
     }
 
     pDispatch = p;

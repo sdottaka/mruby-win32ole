@@ -92,7 +92,7 @@ ole_method_sub(mrb_state *mrb, mrb_value self, ITypeInfo *pOwnerTypeInfo, ITypeI
             continue;
         }
         fname = WC2VSTR(mrb, bstr);
-        if (strcasecmp(mrb_string_value_ptr(mrb, name), mrb_string_value_ptr(mrb, fname)) == 0) {
+        if (strcasecmp(ole_obj_to_cstr(mrb, name), ole_obj_to_cstr(mrb, fname)) == 0) {
             olemethod_set_member(mrb, self, pTypeInfo, pOwnerTypeInfo, i, fname);
             method = self;
         }

@@ -78,7 +78,7 @@ hash2olerec(mrb_state *mrb, mrb_value key, mrb_value val, mrb_value rec)
         SysFreeString(pbuf);
         VariantClear(&var);
         if (FAILED(hr)) {
-            ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "failed to putfield of `%s`", mrb_string_value_ptr(mrb, key));
+            ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "failed to putfield of `%s`", ole_obj_to_cstr(mrb, key));
         }
     }
     return 0;
@@ -322,7 +322,7 @@ folerecord_initialize(mrb_state *mrb, mrb_value self) {
     hr = recordinfo_from_itypelib(mrb, pTypeLib, typename, &pri);
     OLE_RELEASE(pTypeLib);
     if (FAILED(hr)) {
-        ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "fail to query IRecordInfo interface for `%s'", mrb_string_value_ptr(mrb, typename));
+        ole_raise(mrb, hr, E_WIN32OLE_RUNTIME_ERROR, "fail to query IRecordInfo interface for `%s'", ole_obj_to_cstr(mrb, typename));
     }
 
     prec = olerecorddata_alloc(mrb);
