@@ -15,12 +15,6 @@ conf.gem :git => 'git://github.com/sdottaka/mruby-win32ole.git'
 
 See `mruby-win32ole/example` directory.
 
-## Current Status
-
-Work in progress
-
-Examples seems work, but there is no test.
-
 ## License
 
 GNU General Public License or Artistic License
