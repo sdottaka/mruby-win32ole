@@ -153,16 +153,10 @@ struct oledata {
 
 extern const mrb_data_type ole_datatype;
 
-#define OLEData_Get_Struct(mrb, obj, pole) {\
-    Data_Get_Struct(mrb, obj, &ole_datatype, pole);\
-    if(!pole->pDispatch) {\
-        mrb_raise(mrb, E_RUNTIME_ERROR, "failed to get Dispatch Interface");\
-    }\
-}
-
 #define C_WIN32OLE (mrb_class_get(mrb, "WIN32OLE"))
 LCID cWIN32OLE_lcid;
 
+struct oledata *oledata_get_struct(mrb_state *mrb, mrb_value obj);
 BSTR ole_vstr2wc(mrb_state *mrb, mrb_value vstr);
 LONG reg_open_key(HKEY hkey, const char *name, HKEY *phkey);
 LONG reg_open_vkey(mrb_state *mrb, HKEY hkey, mrb_value key, HKEY *phkey);

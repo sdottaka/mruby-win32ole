@@ -87,7 +87,7 @@ static long ole_search_event_at(mrb_state *mrb, mrb_value ary, mrb_value ev);
 static mrb_value ole_search_event(mrb_state *mrb, mrb_value ary, mrb_value ev, BOOL  *is_default);
 static mrb_sym ole_search_handler_method(mrb_state *mrb, mrb_value handler, mrb_value ev, BOOL *is_default_handler);
 static void ole_delete_event(mrb_state *mrb, mrb_value ary, mrb_value ev);
-static void ole_event_free(mrb_state *mrb, void *ptr);
+static void oleevent_free(mrb_state *mrb, void *ptr);
 static mrb_value ev_advise(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self);
 static mrb_value fev_initialize(mrb_state *mrb, mrb_value self);
 static void ole_msg_loop(void);
@@ -107,7 +107,7 @@ static long  evs_length(mrb_state *mrb);
 
 static const mrb_data_type oleevent_datatype = {
     "win32ole_event",
-    ole_event_free
+    oleevent_free
 };
 
 STDMETHODIMP EVENTSINK_Invoke(
@@ -497,7 +497,7 @@ find_iid(mrb_state *mrb, mrb_value ole, const char *pitf, IID *piid, ITypeInfo *
     ITypeInfo *pImplTypeInfo;
     TYPEATTR *pImplTypeAttr;
 
-    struct oledata *pole;
+    struct oledata *pole = NULL;
     unsigned int index;
     unsigned int count;
     int type;
@@ -507,7 +507,7 @@ find_iid(mrb_state *mrb, mrb_value ole, const char *pitf, IID *piid, ITypeInfo *
     BOOL is_found = FALSE;
     LCID    lcid = cWIN32OLE_lcid;
 
-    OLEData_Get_Struct(mrb, ole, pole);
+    pole = oledata_get_struct(mrb, ole);
 
     pDispatch = pole->pDispatch;
 
@@ -721,9 +721,9 @@ find_default_source(mrb_state *mrb, mrb_value ole, IID *piid, ITypeInfo **ppType
     TYPEATTR *pTypeAttr = NULL;
     TYPEATTR *pTypeAttr2 = NULL;
 
-    struct oledata *pole;
+    struct oledata *pole = NULL;
 
-    OLEData_Get_Struct(mrb, ole, pole);
+    pole = oledata_get_struct(mrb, ole);
     pDispatch = pole->pDispatch;
     hr = pDispatch->lpVtbl->QueryInterface(pDispatch,
                                            &IID_IProvideClassInfo2,
@@ -872,7 +872,7 @@ ole_delete_event(mrb_state *mrb, mrb_value ary, mrb_value ev)
 
 
 static void
-ole_event_free(mrb_state *mrb, void *ptr)
+oleevent_free(mrb_state *mrb, void *ptr)
 {
     struct oleeventdata *poleev = (struct oleeventdata *)ptr;
     if (!ptr) return;
@@ -904,7 +904,7 @@ ev_advise(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self)
 {
 
     mrb_value ole, itf;
-    struct oledata *pole;
+    struct oledata *pole = NULL;
     const char *pitf;
     HRESULT hr;
     IID iid;
@@ -941,7 +941,7 @@ ev_advise(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self)
         ole_raise(mrb, hr, E_RUNTIME_ERROR, "interface not found");
     }
 
-    OLEData_Get_Struct(mrb, ole, pole);
+    pole = oledata_get_struct(mrb, ole);
     pDispatch = pole->pDispatch;
     hr = pDispatch->lpVtbl->QueryInterface(pDispatch,
                                            &IID_IConnectionPointContainer,
