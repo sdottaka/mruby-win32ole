@@ -19,7 +19,7 @@ if Object.const_defined?(:MTest) && Kernel.respond_to?(:require) && Module.const
   require "test_win32ole_event.rb"
   require "test_win32ole_method.rb"
   require "test_win32ole_param.rb"
-#  require "test_win32ole_record.rb"
+  require "test_win32ole_record.rb"
   require "test_win32ole_type.rb"
   require "test_win32ole_typelib.rb"
   require "test_win32ole_variable.rb"

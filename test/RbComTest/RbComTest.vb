@@ -1,6 +1,6 @@
 Imports System.Runtime.InteropServices
 
-<ComClass(ComSrvTest.ClassId, ComSrvTest.InterfaceId, ComSrvTest.EventsId)>
+<ComClass(ComSrvTest.ClassId, ComSrvTest.InterfaceId, ComSrvTest.EventsId)> _
 Public Class ComSrvTest
 
 #Region "COM GUIDs"
@@ -17,6 +17,11 @@ Public Class ComSrvTest
         <MarshalAs(UnmanagedType.BStr)> _
         Public title As String
         Public cost As Integer
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)> _
+    Public Structure ComObject
+        Public object_id As Integer
     End Structure
 
     Public Function getBook() As Book
