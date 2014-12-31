@@ -392,7 +392,7 @@ if Module.const_defined?(:WIN32OLE)
 
     def test_s_codepage_changed
       skip("mruby-pack is required to test this case") unless [].respond_to?(:pack)
-
+      skip("mruby-string-utf8 is required to test this case") unless "".respond_to?(:codepoints)
       cp = WIN32OLE.codepage
       fso = WIN32OLE.new("Scripting.FileSystemObject")
       fname = fso.getTempName
