@@ -2796,15 +2796,14 @@ ole_invoke(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value self, USHORT
             param = mrb_ary_entry(paramS, i-cNamedArgs);
             if (mrb_obj_is_kind_of(mrb, param, C_WIN32OLE_VARIANT)) {
                 ole_variant2variant(mrb, param, &op.dp.rgvarg[n]);
+            } else if (mrb_obj_is_kind_of(mrb, param, C_WIN32OLE_RECORD)) {
+                ole_val2variant(mrb, param, &realargs[n]);
+                op.dp.rgvarg[n] = realargs[n];
+                V_VT(&op.dp.rgvarg[n]) = VT_RECORD | VT_BYREF;
             } else {
                 ole_val2variant(mrb, param, &realargs[n]);
-				if (realargs[n].vt == VT_RECORD) {
-					op.dp.rgvarg[n] = realargs[n];
-					V_VT(&op.dp.rgvarg[n]) = VT_RECORD | VT_BYREF;
-				} else {
-					V_VT(&op.dp.rgvarg[n]) = VT_VARIANT | VT_BYREF;
-					V_VARIANTREF(&op.dp.rgvarg[n]) = &realargs[n];
-				}
+                V_VT(&op.dp.rgvarg[n]) = VT_VARIANT | VT_BYREF;
+                V_VARIANTREF(&op.dp.rgvarg[n]) = &realargs[n];
             }
         }
     }
