@@ -2219,9 +2219,9 @@ reference_count(struct oledata * pole)
 static mrb_value
 fole_s_reference_count(mrb_state *mrb, mrb_value self)
 {
+    struct oledata * pole = NULL;
     mrb_value obj;
     mrb_get_args(mrb, "o", &obj);
-    struct oledata * pole = NULL;
     pole = oledata_get_struct(mrb, obj);
     return INT2NUM(reference_count(pole));
 }
@@ -2238,10 +2238,10 @@ fole_s_reference_count(mrb_state *mrb, mrb_value self)
 static mrb_value
 fole_s_free(mrb_state *mrb, mrb_value self)
 {
+    struct oledata * pole = NULL;
     mrb_value obj;
     ULONG n = 0;
     mrb_get_args(mrb, "o", &obj);
-    struct oledata * pole = NULL;
     pole = oledata_get_struct(mrb, obj);
     if(pole->pDispatch) {
         if (reference_count(pole) > 0) {
