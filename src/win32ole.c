@@ -2657,7 +2657,7 @@ set_argv(mrb_state *mrb, VARIANTARG* realargs, unsigned int beg, unsigned int en
     mrb_value argv = mrb_const_get(mrb, mrb_obj_value(C_WIN32OLE), mrb_intern_lit(mrb, "ARGV"));
 
     mrb_check_type(mrb, argv, MRB_TT_ARRAY);
-    mrb_ary_clear(mrb, argv);
+    mrb_ary_resize(mrb, argv, 0);
     while (end-- > beg) {
         int ai = mrb_gc_arena_save(mrb);
         mrb_ary_push(mrb, argv, ole_variant2val(mrb, &realargs[end]));
