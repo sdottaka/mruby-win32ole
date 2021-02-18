@@ -481,7 +481,7 @@ folerecord_method_missing(mrb_state *mrb, mrb_value self)
 
 #if SIZEOF_SIZE_T > SIZEOF_LONG
     {
-        size_t n = strlen(mrb_string_value_cstr(mrb, name));
+        size_t n = strlen(mrb_str_to_cstr(mrb, name));
         if (n >= LONG_MAX) {
             mrb_raise(mrb, E_RUNTIME_ERROR, "too long member name");
         }

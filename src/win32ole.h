@@ -45,6 +45,11 @@
 #endif
 #endif
 
+#ifdef __GNUC__
+#define SIZEOF_LONG (__SIZEOF_LONG__)
+#define SIZEOF_SIZE_T (__SIZEOF_SIZE_T__)
+#endif
+
 #include <ctype.h>
 
 #include <windows.h>
@@ -154,7 +159,7 @@ struct oledata {
 extern const mrb_data_type ole_datatype;
 
 #define C_WIN32OLE (mrb_class_get(mrb, "WIN32OLE"))
-LCID cWIN32OLE_lcid;
+extern LCID cWIN32OLE_lcid;
 
 struct oledata *oledata_get_struct(mrb_state *mrb, mrb_value obj);
 BSTR ole_vstr2wc(mrb_state *mrb, mrb_value vstr);
