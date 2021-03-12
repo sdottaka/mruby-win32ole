@@ -37,17 +37,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeBuildCommandLine>pushd "$(ProjectDir)..\..\..\..\"
+    <NMakeBuildCommandLine>pushd "$(ProjectDir)..\..\..\..\..\"
 set PATH=%ProgramFiles%\Git\bin;%ProgramFiles(x86)%\Git\bin;%PATH%
-call "$(DevEnvDir)\..\Tools\vsvars32.bat"
+if exist "$(DevEnvDir)\..\Tools\vsvars32.bat" call "$(DevEnvDir)\..\Tools\vsvars32.bat"
+if exist "$(DevEnvDir)\..\..\VC\Auxiliary\Build\vcvars32.bat" call "$(DevEnvDir)\..\..\VC\Auxiliary\Build\vcvars32.bat"
 set CFLAGS=/c /nologo /W3 /we4013 /Zi /MTd /Od /D_CRT_SECURE_NO_WARNINGS
 set CXXFLAGS=/c /nologo /W3 /we4013 /Zi /MTd /Od /D_CRT_SECURE_NO_WARNINGS
 ruby ./minirake -v
 popd
 </NMakeBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)..\..\..\..\bin\mruby.exe</NMakeOutput>
-    <NMakeCleanCommandLine>pushd "$(ProjectDir)..\..\..\..\"
-call "$(DevEnvDir)\..\Tools\vsvars32.bat"
+    <NMakeOutput>$(ProjectDir)..\..\..\..\..\bin\mruby.exe</NMakeOutput>
+    <NMakeCleanCommandLine>pushd "$(ProjectDir)..\..\..\..\..\"
+if exist "$(DevEnvDir)\..\Tools\vsvars32.bat" call "$(DevEnvDir)\..\Tools\vsvars32.bat"
+if exist "$(DevEnvDir)\..\..\VC\Auxiliary\Build\vcvars32.bat" call "$(DevEnvDir)\..\..\VC\Auxiliary\Build\vcvars32.bat"
 ruby ./minirake clean
 popd
 </NMakeCleanCommandLine>
@@ -57,17 +59,19 @@ $(NMakeBuildCommandLine)
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeBuildCommandLine>pushd "$(ProjectDir)..\..\..\..\"
+    <NMakeBuildCommandLine>pushd "$(ProjectDir)..\..\..\..\..\"
 set PATH=%ProgramFiles%\Git\bin;%ProgramFiles(x86)%\Git\bin;%PATH%
-call "$(DevEnvDir)\..\Tools\vsvars32.bat"
+if exist "$(DevEnvDir)\..\Tools\vsvars32.bat" call "$(DevEnvDir)\..\Tools\vsvars32.bat"
+if exist "$(DevEnvDir)\..\..\VC\Auxiliary\Build\vcvars32.bat" call "$(DevEnvDir)\..\..\VC\Auxiliary\Build\vcvars32.bat"
 set CFLAGS=/c /nologo /W3 /we4013 /Zi /MT /O1 /D_CRT_SECURE_NO_WARNINGS
 set CXXFLAGS=%CFLAGS%
 ruby ./minirake
 popd
 </NMakeBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)..\..\..\..\bin\mruby.exe</NMakeOutput>
-    <NMakeCleanCommandLine>pushd "$(ProjectDir)..\..\..\..\"
-call "$(DevEnvDir)\..\Tools\vsvars32.bat"
+    <NMakeOutput>$(ProjectDir)..\..\..\..\..\bin\mruby.exe</NMakeOutput>
+    <NMakeCleanCommandLine>pushd "$(ProjectDir)..\..\..\..\..\"
+if exist "$(DevEnvDir)\..\Tools\vsvars32.bat" call "$(DevEnvDir)\..\Tools\vsvars32.bat"
+if exist "$(DevEnvDir)\..\..\VC\Auxiliary\Build\vcvars32.bat" call "$(DevEnvDir)\..\..\VC\Auxiliary\Build\vcvars32.bat"
 ruby ./minirake clean
 popd
 </NMakeCleanCommandLine>

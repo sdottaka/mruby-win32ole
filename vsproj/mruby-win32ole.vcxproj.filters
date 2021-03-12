@@ -48,7 +48,7 @@
     <ClCompile Include="..\src\win32ole_variant_m.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\mrbgems\mruby-bin-mruby\tools\mruby\mruby.c">
+    <ClCompile Include="..\..\..\..\..\mrbgems\mruby-bin-mruby\tools\mruby\mruby.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

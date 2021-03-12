@@ -149,12 +149,12 @@ ole_val2variant_err(mrb_state *mrb, mrb_value val, VARIANT *var)
     if (mrb_obj_is_kind_of(mrb, v, C_WIN32OLE_VARIANT)) {
         v = folevariant_value(mrb, v);
     }
-    if (!mrb_fixnum_p(v) && /* FIXME: TYPE(v) != T_BIGNUM &&*/ !mrb_nil_p(v)) {
+    if (!mrb_fixnum_p(v) && !mrb_float_p(v) && /* FIXME: TYPE(v) != T_BIGNUM &&*/ !mrb_nil_p(v)) {
         mrb_raisef(mrb, E_WIN32OLE_RUNTIME_ERROR, "failed to convert VT_ERROR VARIANT:`%S'", mrb_inspect(mrb, v));
     }
     V_VT(var) = VT_ERROR;
     if (!mrb_nil_p(v)) {
-        V_ERROR(var) = NUM2LONG(val);
+        V_ERROR(var) = mrb_fixnum_p(v) ? NUM2LONG(val) : (int)mrb_float(val);
     } else {
         V_ERROR(var) = 0;
     }
